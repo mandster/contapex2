@@ -47,56 +47,55 @@ const Products = () => {
 
   // ... rest of the component remains the same
 
-  return (
-    <div>
-      <h1>Products</h1>
-      <input
-        placeholder="Product Name"
-        value={productName}
-        onChange={(e) => setProductName(e.target.value)}
-      />
-      <input
-        placeholder="Comments"
-        value={comments}
-        onChange={(e) => setComments(e.target.value)}
-      />
-      <button onClick={addProduct}>Add Product</button>
-      <table>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Product Name</th>
-            <th>Comments</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.productName}</td>
-              <td>{product.comments}</td>
-              <td>
-                <button
-                  onClick={() => {
-                    setEditId(product.id);
-                    setProductName(product.productName);
-                    setComments(product.comments);
-                  }}
-                >
-                  Edit
-                </button>
-                <button onClick={() => deleteProduct(product.id)}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {editId ? <button onClick={updateProduct}>Update Product</button> : null}
-    </div>
-  );
+
+return (
+  <div>
+     <h1>Products</h1>
+     <input
+       placeholder="Product Name"
+       value={productName}
+       onChange={(e) => setProductName(e.target.value)}
+     />
+     <input
+       placeholder="Comments"
+       value={comments}
+       onChange={(e) => setComments(e.target.value)}
+     />
+     <button onClick={addProduct}>Add Product</button>
+     <table>
+       <thead>
+         <tr>
+           <th>Employee Name</th> {/* Change this line */}
+           <th>Comments</th>
+           <th>Actions</th>
+         </tr>
+       </thead>
+       <tbody>
+         {products.map((product) => (
+           <tr key={product.id}>
+             <td>{product.employeeName}</td> {/* Change this line */}
+             <td>{product.comments}</td>
+             <td>
+               <button
+                 onClick={() => {
+                  setEditId(product.id);
+                  setProductName(product.productName);
+                  setComments(product.comments);
+                 }}
+               >
+                 Edit
+               </button>
+               <button onClick={() => deleteProduct(product.id)}>
+                 Delete
+               </button>
+             </td>
+           </tr>
+         ))}
+       </tbody>
+     </table>
+     {editId ? <button onClick={updateProduct}>Update Product</button> : null}
+  </div>
+ );
 };
 
 export default Products;
