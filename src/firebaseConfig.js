@@ -1,5 +1,4 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
+import { initializeApp } from "firebase/app";
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -13,4 +12,4 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export { app };
+export default app;

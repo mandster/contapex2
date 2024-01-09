@@ -36,6 +36,7 @@
     ]
   },
   "devDependencies": {
-    "eslint-plugin-flowtype": "^8.0.3"
+    "eslint-plugin-flowtype": "^8.0.3",
+    "webpack": "^5.89.0"
   }
 }
