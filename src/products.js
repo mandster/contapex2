@@ -5,6 +5,7 @@ import {
   getAllProductsFromFirebase,
 } from "./_services/firebaseService";
 import { useEffect, useState } from "react";
+import "./styles.css";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -18,15 +19,12 @@ const ProductList = () => {
     fetchProducts();
   }, []);
 
-  const addProduct = async (product) => {
+  const onAddProduct = async (product) => {
     const productId = await addProductToFirebase(product);
     setProducts([...products, { id: productId, ...product }]);
   };
-  const handleEditProduct = (id, updatedProduct) => {
-    onEditProduct(id, updatedProductWithId);
-  };
 
-  const editProduct = async (id, updatedProduct) => {
+  const onEditProduct = async (id, updatedProduct) => {
     const updatedProductWithId = { ...updatedProduct, id };
 
     await updateProductInFirebase(id, updatedProductWithId);
@@ -35,18 +33,25 @@ const ProductList = () => {
     );
   };
 
-  const deleteProduct = async (id) => {
+  const onDeleteProduct = async (id) => {
     await deleteProductInFirebase(id);
-    setProducts(products.filter((product) => product.id !== id));
+  
+    // Check if products is an array before applying filter
+    if (Array.isArray(products)) {
+      setProducts(products.filter((product) => product.id !== id));
+    } else {
+      console.error('products is not an array:', products);
+    }
   };
+  
   return (
     <div>
       {/* Render the product list and include functionality for adding, editing, and deleting products */}
       <ProductListView
         products={products}
-        onAddProduct={addProduct}
-        onEditProduct={editProduct}
-        onDeleteProduct={deleteProduct}
+        onAddProduct={onAddProduct}
+        onEditProduct={onEditProduct}
+        onDeleteProduct={onDeleteProduct}
       />
     </div>
   );
@@ -64,9 +69,9 @@ const ProductListView = ({
   };
 
   return (
-    <div>
+    <div className="product-list-container">
       {/* Render the product list */}
-      <ul>
+      <ul className="product-list">
         {products.map((product) => (
           <ProductListItem
             key={product.id}
@@ -86,8 +91,8 @@ const ProductListView = ({
 // Extracted component for rendering each product item
 const ProductListItem = ({ product, onEditProduct, onDeleteProduct }) => {
   return (
-    <li>
-      {product.name} - {product.price}
+    <li className="product-item">
+      <span className="product-name">{product.productName}</span>
       <button onClick={() => onEditProduct(product.id, updatedProduct)}>
         Edit
       </button>
