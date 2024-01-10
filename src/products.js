@@ -15,9 +15,10 @@ const ProductList = () => {
       const productsFromFirebase = await getAllProductsFromFirebase();
       setProducts(productsFromFirebase);
     };
-
     fetchProducts();
   }, []);
+
+  const [size, setSize] = useState("");
 
   const onAddProduct = async (product) => {
     const productId = await addProductToFirebase(product);
@@ -27,45 +28,166 @@ const ProductList = () => {
   const onEditProduct = async (id, updatedProduct) => {
     const updatedProductWithId = { ...updatedProduct, id };
 
+    // Check if products is an array before applying map
+    if (Array.isArray(products)) {
+      setProducts(
+        products.map((product) =>
+          product.id === id ? updatedProductWithId : product
+        )
+      );
+    } else if (typeof products === "object" && products !== null) {
+      // If products is an object, convert it to an array before applying map
+      const productsArray = Object.values(products);
+      setProducts(
+        productsArray.map((product) =>
+          product.id === id ? updatedProductWithId : product
+        )
+      );
+    } else {
+      console.error("products is not an array or object:", products);
+    }
     await updateProductInFirebase(id, updatedProductWithId);
-    setProducts(
-      products.map((product) => (product.id === id ? updatedProduct : product))
-    );
   };
 
   const onDeleteProduct = async (id) => {
     await deleteProductInFirebase(id);
-  
+
     // Check if products is an array before applying filter
     if (Array.isArray(products)) {
       setProducts(products.filter((product) => product.id !== id));
     } else {
-      console.error('products is not an array:', products);
+      console.error("products is not an array:", products);
     }
   };
-  
-  return (
-    <div>
-      {/* Render the product list and include functionality for adding, editing, and deleting products */}
-      <ProductListView
-        products={products}
-        onAddProduct={onAddProduct}
-        onEditProduct={onEditProduct}
-        onDeleteProduct={onDeleteProduct}
-      />
-    </div>
-  );
-};
 
-// Extracted component for rendering the product list
-const ProductListView = ({
-  products,
-  onAddProduct,
-  onEditProduct,
-  onDeleteProduct,
-}) => {
-  const handleEditProduct = (id, updatedProduct) => {
-    onEditProduct(id, updatedProduct);
+  const ProductForm = ({ onAddProduct }) => {
+    const [productName, setProductName] = useState("");
+    const [description, setDescription] = useState("");
+
+    const handleAddProduct = () => {
+      const newProduct = {
+        id: Date.now(),
+        productName: productName,
+        description: description,
+        size: size,
+      };
+
+      onAddProduct(newProduct);
+      setProductName("");
+      setDescription("");
+      setSize("");
+    };
+
+    return (
+      <div>
+        {/* Render the form */}
+        <input
+          type="text"
+          placeholder="Product Name"
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Size"
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <button onClick={handleAddProduct}>Add Product</button>
+      </div>
+    );
+  };
+  // Extracted component for rendering the product list
+  const ProductListView = ({
+    products,
+    onAddProduct,
+    onEditProduct,
+    onDeleteProduct,
+  }) => {
+    return (
+      <div>
+        {/* Render the product list and include functionality for adding, editing, and deleting products */}
+        <ProductListView
+          products={products}
+          onAddProduct={onAddProduct}
+          onEditProduct={onEditProduct}
+          onDeleteProduct={onDeleteProduct}
+        />
+      </div>
+    );
+  };
+
+  // Extracted component for rendering each product item
+  const ProductListItem = ({ product, onEditProduct, onDeleteProduct }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [updatedProductName, setUpdatedProductName] = useState(
+      product.productName
+    );
+    const [updatedSize, setUpdatedSize] = useState(product.size);
+    const [updatedDescription, setUpdatedDescription] = useState(
+      product.description
+    );
+
+    const handleEditProduct = () => {
+      setIsEditing(true);
+    };
+
+    const handleUpdateProduct = () => {
+      const updatedProductDetails = {
+        productName: updatedProductName,
+        size: updatedSize,
+        description: updatedDescription,
+      };
+
+      onEditProduct(product.id, updatedProductDetails);
+      setIsEditing(false);
+    };
+
+    const handleCancelEdit = () => {
+      setIsEditing(false);
+    };
+
+    return (
+      <li className="product-item">
+        {isEditing ? (
+          <>
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={updatedProductName}
+              onChange={(e) => setUpdatedProductName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Size"
+              value={updatedSize}
+              onChange={(e) => setUpdatedSize(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={updatedDescription}
+              onChange={(e) => setUpdatedDescription(e.target.value)}
+            />
+            <button onClick={handleUpdateProduct}>Update</button>
+            <button onClick={handleCancelEdit}>Cancel</button>
+          </>
+        ) : (
+          <>
+            <span className="product-name">{product.productName}</span>
+            <span className="product-size">{product.size}</span>
+            <button onClick={handleEditProduct}>Edit</button>
+            <button onClick={() => onDeleteProduct(product.id)}>Delete</button>
+          </>
+        )}
+      </li>
+    );
   };
 
   return (
@@ -76,64 +198,13 @@ const ProductListView = ({
           <ProductListItem
             key={product.id}
             product={product}
-            onEditProduct={handleEditProduct}
+            onEditProduct={onEditProduct}
             onDeleteProduct={onDeleteProduct}
           />
         ))}
       </ul>
-
       {/* Render the form for adding new products */}
       <ProductForm onAddProduct={onAddProduct} />
-    </div>
-  );
-};
-
-// Extracted component for rendering each product item
-const ProductListItem = ({ product, onEditProduct, onDeleteProduct }) => {
-  return (
-    <li className="product-item">
-      <span className="product-name">{product.productName}</span>
-      <button onClick={() => onEditProduct(product.id, updatedProduct)}>
-        Edit
-      </button>
-      <button onClick={() => onDeleteProduct(product.id)}>Delete</button>
-    </li>
-  );
-};
-
-// Extracted component for the product form
-const ProductForm = ({ onAddProduct }) => {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-
-  const handleAddProduct = () => {
-    const newProduct = {
-      id: Date.now(),
-      name: name,
-      price: price,
-    };
-
-    onAddProduct(newProduct);
-    setName("");
-    setPrice("");
-  };
-
-  return (
-    <div>
-      {/* Render the form */}
-      <input
-        type="text"
-        placeholder="Product Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Product Price"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-      />
-      <button onClick={handleAddProduct}>Add Product</button>
     </div>
   );
 };
