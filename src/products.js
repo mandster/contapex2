@@ -9,6 +9,8 @@ import "./styles.css";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [showAddButton, setAddButton] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -19,6 +21,14 @@ const ProductList = () => {
   }, []);
 
   const [size, setSize] = useState("");
+  const handleAddButton = () => {
+    setShowForm(true);
+    setAddButton(false);
+  };
+  const handleCancelAdd = () => {
+    setShowForm(false);
+    setAddButton(true);
+  };
 
   const onAddProduct = async (product) => {
     const productId = await addProductToFirebase(product);
@@ -66,6 +76,7 @@ const ProductList = () => {
   const ProductForm = ({ onAddProduct }) => {
     const [productName, setProductName] = useState("");
     const [description, setDescription] = useState("");
+    const [size, setSize] = useState("");
 
     const handleAddProduct = () => {
       const newProduct = {
@@ -78,50 +89,39 @@ const ProductList = () => {
       setProductName("");
       setDescription("");
       setSize("");
+      setShowForm(false); // Hide the form after submission
     };
 
     return (
-      <div>
-        {/* Render the form */}
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={productName}
-          onChange={(e) => setProductName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Size"
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button onClick={handleAddProduct}>Add Product</button>
-      </div>
-    );
-  };
-  // Extracted component for rendering the product list
-  const ProductListView = ({
-    products,
-    onAddProduct,
-    onEditProduct,
-    onDeleteProduct,
-  }) => {
-    return (
-      <div>
-        {/* Render the product list and include functionality for adding, editing, and deleting products */}
-        <ProductListView
-          products={products}
-          onAddProduct={onAddProduct}
-          onEditProduct={onEditProduct}
-          onDeleteProduct={onDeleteProduct}
-        />
-      </div>
+      <>
+        <div className="product-form-container">
+          {/* Render the form */}
+          <input
+            type="text"
+            placeholder="Product Name"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Size"
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <button onClick={handleAddProduct} id="add-button">
+            Add
+          </button>
+          <button onClick={handleCancelAdd} id="cancel-button">
+            X
+          </button>
+        </div>
+      </>
     );
   };
 
@@ -185,15 +185,54 @@ const ProductList = () => {
             <span className="product-name">{product.productName}</span>
             <span className="product-size">{product.size}</span>
             <button onClick={handleEditProduct}>Edit</button>
-            <button onClick={() => onDeleteProduct(product.id)}>Delete</button>
+            <button
+              id="delete-button"
+              onClick={() => onDeleteProduct(product.id)}
+            >
+              Delete
+            </button>
           </>
         )}
       </li>
     );
   };
 
+  // Extracted component for rendering the product list
+  const ProductListView = ({
+    products,
+    onAddProduct,
+    onEditProduct,
+    onDeleteProduct,
+  }) => {
+    return (
+      <div>
+        {/* Render the product list and include functionality for adding, editing, and deleting products */}
+        <ProductListView
+          products={products}
+          onAddProduct={onAddProduct}
+          onEditProduct={onEditProduct}
+          onDeleteProduct={onDeleteProduct}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="product-list-container">
+      {showAddButton && (
+        <button id="add-button" onClick={handleAddButton}>
+          + Add new
+        </button>
+      )}
+
+      {/* Render the form for adding new products conditionally */}
+      {showForm && <ProductForm onAddProduct={onAddProduct} />}
+      {/* Heading row */}
+      <div className="product-list-heading">
+        <span className="heading-item">Product Name</span>
+        <span className="heading-item">Size</span>
+        <span className="heading-item">Options</span>
+      </div>
       {/* Render the product list */}
       <ul className="product-list">
         {products.map((product) => (
@@ -205,10 +244,7 @@ const ProductList = () => {
           />
         ))}
       </ul>
-      {/* Render the form for adding new products */}
-      <ProductForm onAddProduct={onAddProduct} />
     </div>
   );
 };
-
 export default ProductList;

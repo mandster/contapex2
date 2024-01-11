@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/css/bootstrap.css";
 import logo from "./images/logo.jpg";
 import Products from "./products";
 
@@ -13,10 +14,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       <div className="App">
-
-        <header className="App-header">
-         
-        </header>
+        <header className="App-header"></header>
       </div>
     </>
   );
