@@ -26,10 +26,12 @@ const ProductList = () => {
   };
 
   const onEditProduct = async (id, updatedProduct) => {
-    const updatedProductWithId = { ...updatedProduct, id };
+    const updatedProductWithId = { ...updatedProduct, id }; // This assumes id is the document ID
 
     // Check if products is an array before applying map
     if (Array.isArray(products)) {
+      console.log(products);
+
       setProducts(
         products.map((product) =>
           product.id === id ? updatedProductWithId : product
@@ -46,6 +48,7 @@ const ProductList = () => {
     } else {
       console.error("products is not an array or object:", products);
     }
+
     await updateProductInFirebase(id, updatedProductWithId);
   };
 
@@ -66,7 +69,6 @@ const ProductList = () => {
 
     const handleAddProduct = () => {
       const newProduct = {
-        id: Date.now(),
         productName: productName,
         description: description,
         size: size,

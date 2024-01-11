@@ -14,6 +14,7 @@ import {
 const db = getFirestore(app);
 
 const addProductToFirebase = async (product) => {
+  console.log(product);
   const docRef = await addDoc(collection(db, "products"), product);
   return docRef.id;
 };
