@@ -1,4 +1,4 @@
-.product-list-container {
+.a-list-container {
   width: 80%;
 
   margin: auto;
@@ -8,12 +8,12 @@
   z-index: 1;
 }
 
-.product-list {
+.a-list {
   list-style: none;
   padding: 0;
 }
 /* Add styles for heading row */
-.product-list-heading {
+.a-list-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,7 +30,7 @@
 
 /* ... (other styles) */
 /* Add styles for heading row */
-.product-list-heading {
+.a-list-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -49,14 +49,14 @@
 
 /* ... (other styles) */
 
-.product-name {
+.a-name {
   flex: 1;
 }
-.product-size {
+.a-size {
   flex: 1;
 }
 
-.product-item {
+.a-item {
   display: flex;
   justify-content: space-between;
   align-items: center; /* Align to the center */
@@ -64,12 +64,12 @@
   padding: 10px;
 }
 
-.product-item button {
+.a-item button {
   cursor: pointer;
   padding: 5px 10px;
 }
 
-.product-form {
+.a-form {
   position: fixed; /* Fixed position to stay on top */
   top: 20px;
   left: 50%; /* Center horizontally */
@@ -82,19 +82,19 @@
   align-items: center;
 }
 
-.product-form input {
+.a-form input {
   margin-right: 10px;
   padding: 8px;
 }
 
-.product-form button {
+.a-form button {
   padding: 8px 15px;
   cursor: pointer;
 }
 /* ... (previous styles) */
 
 /* Add styles for buttons */
-.product-item button {
+.a-item button {
   cursor: pointer;
   padding: 8px 15px;
   margin: 5px;
@@ -105,7 +105,7 @@
   transition: background-color 0.3s ease;
 }
 
-.product-list-container button {
+.a-list-container button {
   cursor: pointer;
   padding: 8px 15px;
   margin: 5px;
@@ -116,7 +116,7 @@
   transition: background-color 0.3s ease;
 }
 
-.product-list-container input {
+.a-list-container input {
   cursor: pointer;
   padding: 8px 15px;
   margin: 5px;
@@ -125,6 +125,10 @@
   border: 1px solid gray;
   border-radius: 4px;
   transition: background-color 0.3s ease;
+}
+
+.a-list-container input {
+  color: #464646; /* White text color */
 }
 
 #cancel-button {
@@ -146,7 +150,7 @@
   background-color: #048181; /* Blue color */
 }
 
-.product-form button {
+.a-form-container button {
   padding: 8px 15px;
   cursor: pointer;
   background-color: #2ecc71; /* Green color */
@@ -157,8 +161,8 @@
 }
 
 /* Change button color on hover */
-.product-item button:hover,
-.product-form button:hover {
+.a-item button:hover,
+.a-form-container button:hover {
   background-color: #2980b9; /* Darker blue on hover */
 }
 
@@ -166,29 +170,43 @@
 
 /* Responsive design for smaller screens */
 @media screen and (max-width: 768px) {
-  .product-list-container {
+  .a-list-container {
     width: 100%;
     box-sizing: border-box;
   }
 
-  .product-item {
+  .a-item {
     flex-direction: column;
     text-align: center;
   }
 
-  .product-item button {
+  .a-item button {
     margin-top: 10px;
     margin-left: 0;
   }
+  .a-form-container {
+    width: 80%;
+    margin: auto;
+  }
 
-  .product-form {
+  .a-form-container input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  .a-form {
     flex-direction: column;
     width: 80%; /* Adjust the width as needed */
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .product-form input {
+  .a-form input {
     margin-bottom: 10px;
     margin-right: 0;
   }

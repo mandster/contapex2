@@ -55,10 +55,45 @@ const getAllProductsFromFirebase = async () => {
   const querySnapshot = await getDocs(collection(db, "products"));
   return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
+const addEmployeeToFirebase = async (employee) => {
+  const docRef = await addDoc(collection(db, "employees"), employee);
+  return docRef.id;
+};
 
+const updateEmployeeInFirebase = async (id, updatedEmployee) => {
+  const employeeRef = doc(db, "employees", id);
+
+  const dataToUpdate = {
+    employeeName: updatedEmployee.employeeName,
+    priceCategory: updatedEmployee.priceCategory,
+    definition: updatedEmployee.definition,
+    // ... other fields
+  };
+
+  try {
+    await updateDoc(employeeRef, dataToUpdate);
+    console.log("Document successfully updated!");
+  } catch (error) {
+    console.error("Error updating document:", error);
+  }
+};
+
+const deleteEmployeeInFirebase = async (id) => {
+  const employeeRef = doc(db, "employees", id);
+  await deleteDoc(employeeRef);
+};
+
+const getAllEmployeesFromFirebase = async () => {
+  const querySnapshot = await getDocs(collection(db, "employees"));
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
 export {
   addProductToFirebase,
   updateProductInFirebase,
   deleteProductInFirebase,
   getAllProductsFromFirebase,
+  addEmployeeToFirebase,
+  updateEmployeeInFirebase,
+  deleteEmployeeInFirebase,
+  getAllEmployeesFromFirebase,
 };

@@ -4,6 +4,7 @@ import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/css/bootstrap.css";
 import logo from "./images/logo.jpg";
 import Products from "./products";
+import Employees from "./employees";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/Products" element={<Products />} />
+          <Route path="/Employees" element={<Employees />} />
         </Routes>
       </BrowserRouter>
       <div className="App">

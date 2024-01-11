@@ -94,7 +94,7 @@ const ProductList = () => {
 
     return (
       <>
-        <div className="product-form-container">
+        <div className="a-form-container">
           {/* Render the form */}
           <input
             type="text"
@@ -156,7 +156,7 @@ const ProductList = () => {
     };
 
     return (
-      <li className="product-item">
+      <li className="a-item">
         {isEditing ? (
           <>
             <input
@@ -182,8 +182,8 @@ const ProductList = () => {
           </>
         ) : (
           <>
-            <span className="product-name">{product.productName}</span>
-            <span className="product-size">{product.size}</span>
+            <span className="a-name">{product.productName}</span>
+            <span className="a-size">{product.size}</span>
             <button onClick={handleEditProduct}>Edit</button>
             <button
               id="delete-button"
@@ -218,7 +218,7 @@ const ProductList = () => {
   };
 
   return (
-    <div className="product-list-container">
+    <div className="a-list-container">
       {showAddButton && (
         <button id="add-button" onClick={handleAddButton}>
           + Add new
@@ -228,13 +228,13 @@ const ProductList = () => {
       {/* Render the form for adding new products conditionally */}
       {showForm && <ProductForm onAddProduct={onAddProduct} />}
       {/* Heading row */}
-      <div className="product-list-heading">
+      <div className="a-list-heading">
         <span className="heading-item">Product Name</span>
         <span className="heading-item">Size</span>
         <span className="heading-item">Options</span>
       </div>
       {/* Render the product list */}
-      <ul className="product-list">
+      <ul className="a-list">
         {products.map((product) => (
           <ProductListItem
             key={product.id}
