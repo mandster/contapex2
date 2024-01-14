@@ -52,6 +52,10 @@
 .a-name {
   flex: 1;
 }
+
+.a2-name {
+  flex: 2;
+}
 .a-size {
   flex: 1;
 }
@@ -82,7 +86,7 @@
   align-items: center;
 }
 
-.a-form input {
+.a-form input select {
   margin-right: 10px;
   padding: 8px;
 }
@@ -116,23 +120,28 @@
   transition: background-color 0.3s ease;
 }
 
-.a-list-container input {
+.a-list-container input select {
   cursor: pointer;
   padding: 8px 15px;
   margin: 5px;
   background-color: #ffffff; /* Blue color */
-  color: #fff; /* White text color */
-  border: 1px solid gray;
+  color: #333232; /* White text color */
   border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
-.a-list-container input {
-  color: #464646; /* White text color */
+.a-select {
+  background-color: #ffffff; /* Blue color */
+  color: #333232; /* White text color */
+  border-radius: 4px;
+  height: 30px;
 }
 
 #cancel-button {
   background-color: #db5b34; /* Blue color */
+}
+#a-flex {
+  width: 1400px;
 }
 
 #edit-button {

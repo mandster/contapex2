@@ -4,8 +4,7 @@ products component: it should list all products. Should have the ability to add,
 
 employees component: it should list all employees. Should have the ability to add, edit and delete employees. it should have Id, employee name, price category, comments
 
-price component: it should have price of all products, there need to be 3 types of prices for different cateroies of employees
-we should have an option to introduce new price at beginning of any month. so we need to have a way to retain old prices corresponding to the then entries. new price should reflect in current use 
+price component: it should have price of all products in document called prices. The add form will take products from firebase and present as dropdown. The product will have prices for 3 categories named price, price2 and price 3. the form should allow that. it should also have date column taking current date. please make complete crud 
 
 entries component: it should have crud for entries. An entry will consist of form which let us select product, employee from dropdown based on information from components above. it should display date, need to add quantity and should allow change of date before sending that too to database. entries should be stored in way that it could be retrieved on monthly, yearly.
 

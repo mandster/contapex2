@@ -40,8 +40,6 @@ const ProductList = () => {
 
     // Check if products is an array before applying map
     if (Array.isArray(products)) {
-      console.log(products);
-
       setProducts(
         products.map((product) =>
           product.id === id ? updatedProductWithId : product
@@ -234,7 +232,7 @@ const ProductList = () => {
         <span className="heading-item">Options</span>
       </div>
       {/* Render the product list */}
-      <ul className="a-list">
+      <ul id="a-flex">
         {products.map((product) => (
           <ProductListItem
             key={product.id}
@@ -247,4 +245,5 @@ const ProductList = () => {
     </div>
   );
 };
+
 export default ProductList;
