@@ -7,6 +7,7 @@ import Products from "./products";
 import Employees from "./employees";
 import Header from "./header";
 import Price from "./price";
+import Entries from "./Entries";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/Products" element={<Products />} />
           <Route path="/Employees" element={<Employees />} />
           <Route path="/Price" element={<Price />} />
+          <Route path="/Entries" element={<Entries />} />
         </Routes>
       </BrowserRouter>
 
