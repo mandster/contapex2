@@ -176,16 +176,25 @@ button {
 }
 
 #cancel-button {
-  background-color: #db5b34; /* Blue color */
+  background-color: #d8940d; /* Blue color */
 }
 #a-flex {
   width: 1400px;
 }
 .home-button {
-  width: 300px;
-  height: 300px;
-  border: 1px dotted blue;
+  width: 135px;
+  height: 55px;
   border-radius: 3px;
+  display:inline-block;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  color: beige
+}
+
+.home-container a {
+  text-decoration: none;
 }
 
 #edit-button {
