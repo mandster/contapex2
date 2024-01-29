@@ -3,9 +3,9 @@ import {
   updateEmployeeInFirebase,
   deleteEmployeeInFirebase,
   getAllEmployeesFromFirebase,
-} from "./_services/firebaseService";
+} from '../_services/firebaseService';
 import { useEffect, useState } from "react";
-import "./styles.css";
+import "../styles.css";
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -59,15 +59,23 @@ const EmployeeList = () => {
   };
 
   const onDeleteEmployee = async (id) => {
-    await deleteEmployeeInFirebase(id);
-
-    if (Array.isArray(employees)) {
-      setEmployees(employees.filter((employee) => employee.id !== id));
-    } else {
-      console.error("employees is not an array:", employees);
+    // Show a confirmation dialog
+    const shouldDelete = window.confirm("Are you sure you want to delete this employee?");
+  
+    if (shouldDelete) {
+      // User confirmed, proceed with deletion
+      await deleteEmployeeInFirebase(id);
+  
+      if (Array.isArray(employees)) {
+        // If employees is an array, filter out the deleted employee and update the state
+        setEmployees(employees.filter((employee) => employee.id !== id));
+      } else {
+        // If employees is not an array, log an error to the console
+        console.error("employees is not an array:", employees);
+      }
     }
   };
-
+  
   const EmployeeForm = ({ onAddEmployee }) => {
     const [employeeName, setEmployeeName] = useState("");
     const [priceCategory, setPriceCategory] = useState("");
@@ -198,7 +206,7 @@ const EmployeeList = () => {
     onDeleteEmployee,
   }) => {
     return (
-      <div>
+      <>
         {/* Heading row */}
         <div className="a-list-heading">
           <span className="heading-item">Employee Name</span>
@@ -215,7 +223,7 @@ const EmployeeList = () => {
             />
           ))}
         </ul>
-      </div>
+      </>
     );
   };
 

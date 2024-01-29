@@ -3,11 +3,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/css/bootstrap.css";
 import logo from "./images/logo.jpg";
-import Products from "./products";
-import Employees from "./employees";
+import Products from "./components/products";
+import Employees from "./components/employees";
 import Header from "./header";
-import Price from "./price";
-import Entries from "./Entries";
+import Price from "./components/price";
+import Entries from "./components/Entries";
+import Calculate from "./components/Calculate";
 
 function App() {
   return (
@@ -21,9 +22,9 @@ function App() {
           <Route path="/Employees" element={<Employees />} />
           <Route path="/Price" element={<Price />} />
           <Route path="/Entries" element={<Entries />} />
+          <Route path="/Calculate" element={<Calculate />} />
         </Routes>
       </BrowserRouter>
-
       <div className="App"></div>
     </>
   );

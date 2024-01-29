@@ -37,17 +37,12 @@ const nav = () => {
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="Price">
-                  Price
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
+                <a className="nav-link" href="Entries">
                   Entries
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#">
+                <a className="nav-link" href="Calculate">
                   Calculate
                 </a>
               </li>

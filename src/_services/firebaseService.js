@@ -1,6 +1,8 @@
 // firebaseService.js
 import app from "../firebaseConfig";
-
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 import {
   getFirestore,
   collection,
@@ -8,6 +10,7 @@ import {
   updateDoc,
   deleteDoc,
   getDocs,
+  getDoc,
   doc,
   query,
   where,
@@ -31,8 +34,11 @@ const updateProductInFirebase = async (id, updatedProduct) => {
   const dataToUpdate = {
     // Valid field value types: string, number, boolean, object, array, null
     productName: updatedProduct.productName,
-    description: updatedProduct.description,
-    size: updatedProduct.size,
+    description: updatedProduct.description || "",
+    price: updatedProduct.price || "",
+    price2: updatedProduct.price2 || "",
+    price3: updatedProduct.price3 || "",
+    size: updatedProduct.size || "",
     // ... other fields
   };
   console.log(dataToUpdate);
@@ -47,6 +53,41 @@ const updateProductInFirebase = async (id, updatedProduct) => {
 const deleteProductInFirebase = async (id) => {
   const productRef = doc(db, "products", id);
   await deleteDoc(productRef);
+};
+
+const getProductByIdFromFirebase = async (productId, employeeId) => {
+  try {
+    const productDoc = await getDoc(doc(db, "products", productId));
+    if (productDoc.exists()) {
+      const productData = productDoc.data();
+      const employeeDoc = await getDoc(doc(db, "employees", employeeId));
+      if (employeeDoc.exists()) {
+        const employeeData = employeeDoc.data();
+        const priceCategory = employeeData.priceCategory;
+        let priceKey;
+        if (priceCategory === "1") {
+           priceKey = 'price'
+        } else {
+          priceKey = 'price' + priceCategory;
+        }
+        console.log(productId + " " + employeeId + " " + priceKey + " p " + productData.productName)
+        console.log(productData[priceKey]);
+          return {
+            id: productDoc.id,
+            productName: productData.productName,
+            price: parseFloat(productData[priceKey]) || 0,
+            // Add other fields as needed
+          };
+      } else {
+        throw new Error(`Employee with ID ${employeeId} does not exist`);
+      }
+    } else {
+      throw new Error(`Product with ID ${productId} does not exist`);
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    throw error;
+  }
 };
 
 const getAllProductsFromFirebase = async () => {
@@ -87,12 +128,15 @@ const getAllEmployeesFromFirebase = async () => {
 };
 
 const addPriceToFirebase = async (price) => {
+  console.log(price)
+
   const docRef = await addDoc(collection(db, "prices"), price);
   return docRef.id;
 };
 
 const updatePriceInFirebase = async (id, updatedPrice) => {
   const priceRef = doc(db, "prices", id);
+  console.log(updatedPrice)
   try {
     await updateDoc(priceRef, updatedPrice);
     console.log("Price document successfully updated!");
@@ -129,6 +173,7 @@ const getAllPricesFromFirebase = async () => {
 
       prices.push({
         product: { ...productData, id: priceData.productId },
+        id: doc.id,
         price: priceData.price,
         price2: priceData.price2,
         price3: priceData.price3,
@@ -145,6 +190,86 @@ const getProductsFromFirebase = async () => {
   return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
+
+/// Function to add an entry to the 'entries' collection
+const addEntryToFirebase = async (entry) => {
+  console.log(entry);
+  return;
+  try {
+    const docRef = await addDoc(collection(db, 'entries'), entry);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding entry:', error);
+    throw error;
+  }
+};
+
+// Function to update an entry in the 'entries' collection
+ const updateEntryInFirebase = async (entryId, updatedEntry) => {
+  try {
+    const entryRef = doc(db, 'entries', entryId);
+    await updateDoc(entryRef, updatedEntry);
+  } catch (error) {
+    console.error('Error updating entry:', error);
+    throw error;
+  }
+};
+
+// Function to delete an entry from the 'entries' collection
+ const deleteEntryInFirebase = async (entryId) => {
+  console.log(entryId)
+  try {
+    const entryRef = doc(db, 'entries', entryId);
+    await deleteDoc(entryRef);
+  } catch (error) {
+    console.error('Error deleting entry:', error);
+    throw error;
+  }
+};
+
+const copyPriceDataToProd = async () => {
+  try {
+    // Fetch all documents from the "price" collection
+    const priceSnapshot = await getDocs(collection(db, "prices"));
+    const priceDocuments = priceSnapshot.docs.map((doc) => doc.data());
+
+    // Fetch all documents from the "product" collection
+    const productSnapshot = await getDocs(collection(db, "products"));
+    const productDocuments = productSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // Iterate through each product document
+    for (const product of productDocuments) {
+
+      // Find the corresponding document in the "price" collection based on productId
+      const matchingPriceDoc = priceDocuments.find((price) => price.productId === product.id);
+      
+      if (matchingPriceDoc) {
+
+        // Copy price data from "price" document to "product" document
+        const { price, price2, price3 } = matchingPriceDoc;
+        const productRef = doc(db, "products", product.id);
+      console.log(price + price2 +  price3 +" d ")
+
+        await updateDoc(productRef, { price, price2, price3 });
+        console.log(`Copied price data to product with ID: ${product.id}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error copying price data to product:", error);
+  }
+};
+
+// Function to get all entries from the 'entries' collection
+ const getAllEntriesFromFirebase = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'entries'));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error getting entries:', error);
+    throw error;
+  }
+};
+
 export {
   addProductToFirebase,
   updateProductInFirebase,
@@ -159,4 +284,10 @@ export {
   deletePriceInFirebase,
   getAllPricesFromFirebase,
   getProductsFromFirebase,
+  addEntryToFirebase,
+  updateEntryInFirebase,
+  deleteEntryInFirebase,
+  getAllEntriesFromFirebase,
+  getProductByIdFromFirebase,
+  copyPriceDataToProd
 };
