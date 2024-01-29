@@ -181,6 +181,12 @@ button {
 #a-flex {
   width: 1400px;
 }
+.home-button {
+  width: 300px;
+  height: 300px;
+  border: 1px dotted blue;
+  border-radius: 3px;
+}
 
 #edit-button {
   background-color: #043580; /* Blue color */

@@ -6,7 +6,7 @@ import logo from "./images/logo.jpg";
 import Products from "./components/products";
 import Employees from "./components/employees";
 import Header from "./header";
-import Price from "./components/price";
+import Home from "./Home";
 import Entries from "./components/Entries";
 import Calculate from "./components/Calculate";
 
@@ -21,7 +21,7 @@ function App() {
           <Routes>
             <Route path="/Products" element={<Products />} />
             <Route path="/Employees" element={<Employees />} />
-            <Route path="/Price" element={<Price />} />
+            <Route path="/" element={<Home />} />
             <Route path="/Entries" element={<Entries />} />
             <Route path="/Calculate" element={<Calculate />} />
           </Routes>
