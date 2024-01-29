@@ -16,15 +16,17 @@ function App() {
       <header className="App-header">
         <Header />
       </header>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/Products" element={<Products />} />
-          <Route path="/Employees" element={<Employees />} />
-          <Route path="/Price" element={<Price />} />
-          <Route path="/Entries" element={<Entries />} />
-          <Route path="/Calculate" element={<Calculate />} />
-        </Routes>
-      </BrowserRouter>
+      <div className="container">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/Products" element={<Products />} />
+            <Route path="/Employees" element={<Employees />} />
+            <Route path="/Price" element={<Price />} />
+            <Route path="/Entries" element={<Entries />} />
+            <Route path="/Calculate" element={<Calculate />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
       <div className="App"></div>
     </>
   );
