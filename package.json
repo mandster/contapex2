@@ -1,6 +1,5 @@
 {
   "name": "contract",
-  "homepage": "https://apps.apexelectricals.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

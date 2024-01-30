@@ -279,6 +279,16 @@ const getAllEntriesFromFirebase = async () => {
   }
 };
 
+// Assuming entry.dateAdded is a string representing the date in ISO format (e.g., "2024-01-22T12:34:56Z")
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+
 export {
   addProductToFirebase,
   updateProductInFirebase,
@@ -299,4 +309,5 @@ export {
   getAllEntriesFromFirebase,
   getProductByIdFromFirebase,
   copyPriceDataToProd,
+  formatDate
 };

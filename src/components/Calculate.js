@@ -3,6 +3,7 @@ import {
   getAllEmployeesFromFirebase,
   getAllEntriesFromFirebase,
   getProductByIdFromFirebase,
+  formatDate
 } from "../_services/firebaseService";
 
 const Calculate = () => {
@@ -144,7 +145,7 @@ const Calculate = () => {
           </li>
           {entries.map((entry) => (
             <li className="a-item" key={entry.id}>
-              <span className="a-size">{entry.dateAdded}</span>
+              <span className="a-size">{formatDate(entry.dateAdded)}</span>
               <span className="a-size centered-text">{entry.productName}</span>
               <span className="a-size centered-text">{entry.quantity}</span>
               <span className="a-size centered-text">{entry.price}</span>
