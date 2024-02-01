@@ -139,6 +139,10 @@
   border-radius: 3px;
 }
 
+.form-control {
+  max-width: 90%;
+}
+
 .add-form input,
 button {
   margin: 4px;
@@ -177,7 +181,22 @@ button {
 
 #cancel-button {
   background-color: #d8940d; /* Blue color */
+  color:  #ffffff;
 }
+
+#cancel-button:hover {
+  background-color: #f3b02a; /* Blue color */
+}
+
+#nice-button {
+  background-color: #5cfadd; /* Blue color */
+  color: #022c36;
+}
+
+#nice-button:hover {
+  background-color: #41dabe; /* Blue color */
+}
+
 #a-flex {
   width: 1400px;
 }
@@ -193,16 +212,30 @@ button {
   color: beige
 }
 
+.nav-link:hover {
+  border: 1px solid grey;
+  border-radius: 3px;
+  font-weight:600;
+}
+
 .home-container a {
   text-decoration: none;
 }
 
 #edit-button {
   background-color: #043580; /* Blue color */
+  color:rgb(243, 246, 218)
 }
-
+#edit-button:hover {
+  background-color:#0d4aa5;/* Blue color */
+}
 #delete-button {
   background-color: #db5b34; /* Blue color */
+  color:rgb(243, 246, 218)
+}
+
+#delete-button:hover {
+  background-color: #fe815b; /* Blue color */
 }
 
 #add-button {
@@ -211,7 +244,6 @@ button {
 }
 #add-button:hover {
   background-color: #048181; /* Blue color */
-  color: #bec0c0;
 }
 
 .a-form-container button {

@@ -9,6 +9,7 @@ import Header from "./header";
 import Home from "./Home";
 import Entries from "./components/Entries";
 import Calculate from "./components/Calculate";
+import Search from "./components/Search";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/Entries" element={<Entries />} />
             <Route path="/Calculate" element={<Calculate />} />
+            <Route path="/Search" element={< Search />} />
           </Routes>
         </BrowserRouter>
       </div>

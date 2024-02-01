@@ -8,15 +8,16 @@ import {
   getAllEmployeesFromFirebase,
 } from '../_services/firebaseService';
 
-const Entries = () => {
+const Search = () => {
   const [entries, setEntries] = useState([]);
+  const [showForm, setShowForm] = useState(false);
   const [products, setProducts] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [quantity, setQuantity] = useState('');
   const [productId, setProductId] = useState('');
   const [employeeId, setEmployeeId] = useState('');
+  const [dateAdded, setDateAdded] = useState('');
   const [editingEntryId, setEditingEntryId] = useState(null);
-  const [dateAdded, setDateAdded] = useState(new Date().toISOString().split('T')[0]); // Initialize with current date
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default to current month
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Default to current year
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,6 +41,20 @@ const Entries = () => {
     fetchData();
   }, [selectedMonth, selectedYear]);
 
+  // Fetch employees data asynchronously and set the state
+useEffect(() => {
+  const fetchEmployees = async () => {
+    try {
+      const employeesData = await getAllEmployeesFromFirebase();
+      setEmployees(employeesData);
+    } catch (error) {
+      console.error('Error fetching employees data:', error);
+    }
+  };
+
+  fetchEmployees();
+}, []);
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,37 +68,62 @@ const Entries = () => {
     clearForm();
   };
 
-
   const clearForm = () => {
     setQuantity('');
     setProductId('');
     setEmployeeId('');
     setEditingEntryId(null);
-    setDateAdded(new Date().toISOString().split('T')[0]); // Reset date to current date
   };
 
+  const handleAddButton = () => {
+    setShowForm(true);
+    setAddButton(false);
+  };
+
+  const handleCancelAdd = () => {
+    setShowForm(false);
+    setAddButton(true);
+  };
+
+  const getCurrentDate = () => {
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1; // January is 0
+    const year = currentDate.getFullYear();
+  
+    // Pad single digit day/month with leading zero
+    const formattedDay = day < 10 ? `0${day}` : day;
+    const formattedMonth = month < 10 ? `0${month}` : month;
+  
+    return `${formattedDay}/${formattedMonth}/${year}`;
+  };
+  
   const getProductName = (productId) => {
     const product = products.find((p) => p.id === productId);
     return product ? product.productName : '';
   };
+
 
   const getEmployeeName = (employeeId) => {
     const employee = employees.find((e) => e.id === employeeId);
     return employee ? employee.employeeName : '';
   };
 
-  const handleEditEntry = async (entry) => {
+  const handleEditEntry= async (entry) => {
+    console.log(entry);
     setQuantity(entry.quantity);
     setProductId(entry.productId);
     setEmployeeId(entry.employeeId);
+    setDateAdded(entry.dateAdded)
     setEditingEntryId(entry.id);
-    setDateAdded(entry.dateAdded); // Set dateAdded state
+    setShowForm(true);
+
   };
 
   const handleEditEntrySubmit = async (e) => {
     e.preventDefault();
 
-    if (!productId || !employeeId || !quantity || !dateAdded) {
+    if (!productId || !employeeId || !quantity) {
       alert('Please fill in all required fields.');
       return;
     }
@@ -99,21 +139,10 @@ const Entries = () => {
 
     // Refresh entries
     handleGetEntries();
+    setShowForm(false);
   };
 
-  const handleAddEntry = async () => {
-    const entry = {
-      quantity,
-      productId,
-      employeeId,
-      dateAdded,
-    };
-    await addEntryToFirebase(entry);
-    clearForm();
 
-    // Display success message
-    alert('Entry added successfully!');
-  };
 
   const handleDeleteEntry = async (entryId) => {
     const shouldDelete = window.confirm('Are you sure you want to delete this entry?');
@@ -132,12 +161,17 @@ const Entries = () => {
     setSelectedMonth(parseInt(e.target.value));
   };
 
+  
+  const handleEmployeeChange = (e) => {
+    setEmployeeId(e.target.value);
+  };
+
   const handleYearChange = (e) => {
     setSelectedYear(parseInt(e.target.value));
   };
 
   const handleGetEntries = async () => {
-    const entriesData = await getEntriesForMonthAndYear(selectedMonth, selectedYear);
+    const entriesData = await getEntriesForMonthAndYear(selectedMonth, selectedYear, employeeId);
     setEntries(entriesData);
     setCurrentPage(1); // Reset to the first page when fetching new entries
   };
@@ -153,9 +187,9 @@ const Entries = () => {
   const months = Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: getMonthName(index + 1) }));
   const years = Array.from({ length: 30 }, (_, index) => ({ value: 2021 + index, label: `${2021 + index}` }));
 
-  const getEntriesForMonthAndYear = async (month, year) => {
+  const getEntriesForMonthAndYear = async (month, year, employeeId) => {
     const allEntries = await getAllEntriesFromFirebase();
-
+  
     const filteredEntries = allEntries.filter((entry) => {
       const parseDate = (dateString) => {
         const [day, month, year] = dateString.split('/');
@@ -163,11 +197,15 @@ const Entries = () => {
       };
       
       const entryDate = parseDate(entry.dateAdded);
-      return entryDate.getMonth() + 1 === month && entryDate.getFullYear() === year;
+      const isSameMonthYear = entryDate.getMonth() + 1 === month && entryDate.getFullYear() === year;
+      const belongsToEmployee = entry.employeeId === employeeId;
+  
+      return isSameMonthYear && belongsToEmployee;
     });
-
+  
     return filteredEntries;
   };
+  
 
   // Pagination
   const indexOfLastEntry = currentPage * entriesPerPage;
@@ -186,6 +224,13 @@ const Entries = () => {
   return (
     <div>
       <div className="p-2 m-2">
+      <label>Employee:</label>
+        <select className="m-2" value={employeeId}  onChange={handleEmployeeChange}>
+          { <option> Select Employee </ option>}
+          {employees.map(employee => (
+            <option key={employee.id} value={employee.id}>{employee.employeeName}</option>
+          ))}
+        </select>
         <label className="">Month:</label>
         <select className="m-2" value={selectedMonth} onChange={handleMonthChange}>
           {months.map(month => (
@@ -198,55 +243,59 @@ const Entries = () => {
             <option key={year.value} value={year.value}>{year.label}</option>
           ))}
         </select>
-        <button className="m-2" onClick={handleGetEntries}>Get Entries</button>
+        <button className="m-2" id="add-button" onClick={handleGetEntries}>Get Entries</button>
       </div>
-      <div className="add-form">
-        <h4>{editingEntryId ? 'Edit Entry' : 'Add new Entry'}</h4>
-        <form onSubmit={(e) => { e.preventDefault(); editingEntryId ? handleEditEntrySubmit(e) : handleAddEntry(); }}>
-          <label>Date:</label>
-          <input className="m-2" type="date" value={dateAdded} onChange={(e) => setDateAdded(e.target.value)} size="30" />
-          <select className="m-2 control form-control" onChange={(e) => setEmployeeId(e.target.value)}>
+      {showForm && (
+      <div className="add-form" id="edit-form">
+        <h4>{ 'Edit Entry'}</h4>
+        <form onSubmit={(e) => { e.preventDefault(); handleEditEntrySubmit(e)  }}>
+        <label>Date:</label>
+          <input className="m-2" type="string" value={dateAdded} onChange={(e) => setDate(e.target.value)} size="30" />
+          <label>Product:</label>
+          <select className="m-2" value={productId} onChange={(e) => setProductId(e.target.value)}>
+            <option value="">Select Product</option>
+            {products.map(product => (
+              <option key={product.id} value={product.id}>{product.productName}</option>
+            ))}
+          </select>
+
+          <label>Employee:</label>
+          <select className="m-2" value={ employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
             <option value="">Select Employee</option>
             {employees.map(employee => (
               <option key={employee.id} value={employee.id}>{employee.employeeName}</option>
             ))}
           </select>
-          <select className="m-2  control form-control" value={productId} onChange={(e) => setProductId(e.target.value)}>
-            <option value="">Select Product</option>
-            {products
-              .sort((a, b) => a.productName.localeCompare(b.productName)) // Sort products alphabetically by productName
-              .map(product => (
-                <option key={product.id} value={product.id}>{product.productName}</option>
-              ))}
-          </select>
-          <input className="m-2 control form-control" placeholder="Quantity" type="number" style={{width:90}} value={quantity} onChange={(e) => setQuantity(e.target.value)} size="30" />
-          <button className="m-2" id="add-button" type="submit">{editingEntryId ? 'Update Entry' : 'Add Entry'}</button>
+          <label>Quantity:</label>
+          <input className="m-2" type="number" style={{width:90}} value={quantity} onChange={(e) => setQuantity(e.target.value)} size="30" />
+          <button className="m-2" type="submit">{ 'Update Entry' }</button>
           <button className="m-2" type="button" onClick={() => clearForm()}>Reset</button>
         </form>
       </div>
-
+      )}
       {/* Render the entry list with heading row */}
       <div className="a-list-container">
-        <ul>
-          <li className="a-list-heading">
-            <span className="heading-item">Product</span>
-            <span className="heading-item">Employee</span>
-            <span className="heading-item">Quantity</span>
-            <span className="heading-item">Options</span>
+      <ul >
+        <li className="a-list-heading">
+          <span className="heading-item">Product</span>
+          <span className="heading-item">Employee</span>
+          <span className="heading-item">Quantity</span>
+          <span className="heading-item">Options</span>
+        </li>
+        {currentEntries.map((entry) => (
+         
+          <li  className="a-item" key={entry.id}>
+            <span className="a-size">{getProductName(entry.productId)}</span>
+            <span className="a-size centered-text">{getEmployeeName(entry.employeeId)}</span>
+            <span className="a-size centered-text">{entry.quantity}</span>
+            <span className="a-size centered-text">
+              <button id="edit-button" onClick={() => handleEditEntry(entry)}>Edit</button>
+              <button id="delete-button" onClick={() => handleDeleteEntry(entry.id)}>Delete</button>
+            </span>
           </li>
-          {currentEntries.map((entry) => (
-            <li className="a-item" key={entry.id}>
-              <span className="a-size">{getProductName(entry.productId)}</span>
-              <span className="a-size centered-text">{getEmployeeName(entry.employeeId)}</span>
-              <span className="a-size centered-text">{entry.quantity}</span>
-              <span className="a-size centered-text">
-                <button id="edit-button" onClick={() => handleEditEntry(entry)}>Edit</button>
-                <button id="delete-button" onClick={() => handleDeleteEntry(entry.id)}>Delete</button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+        ))}
+      </ul>
+</div>
       {/* Render pagination buttons */}
       <div>
         <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
@@ -259,10 +308,10 @@ const Entries = () => {
         >
           Next
         </button>
-        <button id="add-button" onClick={() => setEntriesPerPage(9999)}>All entries in single page</button>
+        <button id="add-button"  onClick={() => setEntriesPerPage(9999)} > All entries in single page</button>
       </div>
     </div>
   );
 };
 
-export default Entries;
+export default Search;

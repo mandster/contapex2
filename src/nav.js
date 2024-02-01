@@ -42,6 +42,11 @@ const nav = () => {
                 </a>
               </li>
               <li className="nav-item">
+                <a className="nav-link" href="Search">
+                  Search
+                </a>
+              </li>
+              <li className="nav-item">
                 <a className="nav-link" href="Calculate">
                   Calculate
                 </a>

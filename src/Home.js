@@ -21,6 +21,11 @@ const Home = () => {
         <h4>  Entries </h4>
         </div>
         </Link>
+        <Link to="/Search" className="button " >
+        <div className="home-button " id="nice-button">
+        <h4>   Search </h4>
+      </div>
+        </Link>
         <Link to="/Calculate" className="button " >
         <div className="home-button " id="delete-button">
         <h4>   Calculate </h4>
