@@ -3,15 +3,17 @@ import {
   getAllEmployeesFromFirebase,
   getAllEntriesFromFirebase,
   getProductByIdFromFirebase,
-  formatDate
+  presentToast,
+
 } from "../_services/firebaseService";
 
 const Calculate = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Initialize with current month
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [entries, setEntries] = useState([]);
   const [totalMonthAmount, setTotalMonthAmount] = useState(0);
+  const [totalQuantity, setTotalQuantity] = useState(0);
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
@@ -35,9 +37,7 @@ const Calculate = () => {
   };
 
   const handleGetRecords = async () => {
-    console.log(
-      selectedMonth + " ss " + selectedYear + " cc " + selectedEmployeeId
-    );
+
     if (!selectedMonth || !selectedYear || !selectedEmployeeId) {
       alert("Please select month, year, and employee");
       return;
@@ -59,7 +59,7 @@ const Calculate = () => {
         );
       });
       let total = 0;
-      console.log(filteredEntries);
+      let totalQty = 0;
       const updatedEntries = await Promise.all(
         filteredEntries.map(async (entry) => {
           // console.log(entry.productId + " dsds " + entry.employeeId)
@@ -69,6 +69,7 @@ const Calculate = () => {
           );
           const rowTotal = entry.quantity * (product.price || 0); // Use 0 if price is not available
           total += parseFloat(rowTotal);
+          totalQty += parseFloat(entry.quantity);
           return {
             ...entry,
             productName: product.productName,
@@ -79,6 +80,7 @@ const Calculate = () => {
       );
       setEntries(updatedEntries);
       setTotalMonthAmount(total);
+      setTotalQuantity(totalQty);
     } catch (error) {
       console.error("Error fetching records:", error);
     }
@@ -104,17 +106,16 @@ const Calculate = () => {
 
           <label>Year:</label>
           <select
-            className="m-2"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            <option value="">Select Year</option>
-            {Array.from({ length: 30 }, (_, index) => (
-              <option key={index + 2021} value={index + 2021}>
-                {index + 2021}
-              </option>
-            ))}
-          </select>
+  className="m-2"
+  value={selectedYear}
+  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+>
+  {Array.from({ length: 30 }, (_, index) => (
+    <option key={index + 2021} value={index + 2021}>
+      {index + 2021}
+    </option>
+  ))}
+</select>
 
           <label>Employee:</label>
           <select
@@ -153,11 +154,20 @@ const Calculate = () => {
                 {entry.rowTotal.toFixed(2)}
               </span>
             </li>
+
+         
           ))}
+                     <li className="a-item">
+           <span className="a-size"></span>
+           <span className="a-size centered-text"></span>
+           <span className="a-size centered-text"><b>{totalQuantity.toFixed(0)} </b></span>
+           <span className="a-size centered-text"></span>
+           <span className="a-size centered-text"></span>
+         </li>
         </ul>
       </div>
       <div className="total">
-        <strong>Total Month Amount:</strong> {totalMonthAmount.toFixed(2)}
+        <strong>Total Month Amount: Rs.</strong> {totalMonthAmount.toFixed(2)}
       </div>
     </div>
   );

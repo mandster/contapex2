@@ -3,6 +3,8 @@ import app from "../firebaseConfig";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   getFirestore,
   collection,
@@ -41,7 +43,6 @@ const updateProductInFirebase = async (id, updatedProduct) => {
     size: updatedProduct.size || "",
     // ... other fields
   };
-  console.log(dataToUpdate);
   try {
     await updateDoc(productRef, dataToUpdate);
     console.log("Document successfully updated!");
@@ -70,16 +71,7 @@ const getProductByIdFromFirebase = async (productId, employeeId) => {
         } else {
           priceKey = "price" + priceCategory;
         }
-        console.log(
-          productId +
-            " " +
-            employeeId +
-            " " +
-            priceKey +
-            " p " +
-            productData.productName
-        );
-        console.log(productData[priceKey]);
+
         return {
           id: productDoc.id,
           productName: productData.productName,
@@ -100,7 +92,7 @@ const getProductByIdFromFirebase = async (productId, employeeId) => {
 
 const getAllProductsFromFirebase = async () => {
   const querySnapshot = await getDocs(collection(db, "products"));
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return querySnapshot.docs.map((doc) => ({ productId: doc.id, ...doc.data() }));
 };
 const addEmployeeToFirebase = async (employee) => {
   const docRef = await addDoc(collection(db, "employees"), employee);
@@ -136,15 +128,12 @@ const getAllEmployeesFromFirebase = async () => {
 };
 
 const addPriceToFirebase = async (price) => {
-  console.log(price);
-
   const docRef = await addDoc(collection(db, "prices"), price);
   return docRef.id;
 };
 
 const updatePriceInFirebase = async (id, updatedPrice) => {
   const priceRef = doc(db, "prices", id);
-  console.log(updatedPrice);
   try {
     await updateDoc(priceRef, updatedPrice);
     console.log("Price document successfully updated!");
@@ -200,9 +189,8 @@ const getProductsFromFirebase = async () => {
 
 /// Function to add an entry to the 'entries' collection
 const addEntryToFirebase = async (entry) => {
-  console.log(entry);
   try {
-    const docRef = await addDoc(collection(db, "entries"), entry);
+    const docRef = await addDoc(collection(db, "entries2"), entry);
     return docRef.id;
   } catch (error) {
     console.error("Error adding entry:", error);
@@ -213,7 +201,7 @@ const addEntryToFirebase = async (entry) => {
 // Function to update an entry in the 'entries' collection
 const updateEntryInFirebase = async (entryId, updatedEntry) => {
   try {
-    const entryRef = doc(db, "entries", entryId);
+    const entryRef = doc(db, "entries2", entryId);
     await updateDoc(entryRef, updatedEntry);
   } catch (error) {
     console.error("Error updating entry:", error);
@@ -223,9 +211,8 @@ const updateEntryInFirebase = async (entryId, updatedEntry) => {
 
 // Function to delete an entry from the 'entries' collection
 const deleteEntryInFirebase = async (entryId) => {
-  console.log(entryId);
   try {
-    const entryRef = doc(db, "entries", entryId);
+    const entryRef = doc(db, "entries2", entryId);
     await deleteDoc(entryRef);
   } catch (error) {
     console.error("Error deleting entry:", error);
@@ -257,8 +244,6 @@ const copyPriceDataToProd = async () => {
         // Copy price data from "price" document to "product" document
         const { price, price2, price3 } = matchingPriceDoc;
         const productRef = doc(db, "products", product.id);
-        console.log(price + price2 + price3 + " d ");
-
         await updateDoc(productRef, { price, price2, price3 });
         console.log(`Copied price data to product with ID: ${product.id}`);
       }
@@ -271,7 +256,7 @@ const copyPriceDataToProd = async () => {
 // Function to get all entries from the 'entries' collection
 const getAllEntriesFromFirebase = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "entries"));
+    const querySnapshot = await getDocs(collection(db, "entries2"));
     return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error getting entries:", error);
@@ -288,6 +273,12 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
+const presentToast = (message) => {
+  console.log(message);
+  toast.success(message , {
+    position: toast.POSITION.TOP_RIGHT
+  });
+};
 
 export {
   addProductToFirebase,
@@ -309,5 +300,6 @@ export {
   getAllEntriesFromFirebase,
   getProductByIdFromFirebase,
   copyPriceDataToProd,
-  formatDate
+  formatDate,
+  presentToast
 };
