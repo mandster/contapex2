@@ -60,6 +60,18 @@ async function migrate() {
   console.log('  Firestore → Supabase migration');
   console.log('═══════════════════════════════════════\n');
 
+  // Guard: abort if data already exists in either table to prevent duplicates
+  const [{ count: productCount }, { count: employeeCount }] = await Promise.all([
+    supabase.from('products').select('*', { count: 'exact', head: true }),
+    supabase.from('employees').select('*', { count: 'exact', head: true }),
+  ]);
+  if (productCount > 0 || employeeCount > 0) {
+    console.error(`✗ Aborting: Supabase already has ${productCount} product(s) and ${employeeCount} employee(s).`);
+    console.error('  Run the following in the Supabase SQL Editor to clean up, then re-run this script:');
+    console.error('    TRUNCATE entries, prices, products, employees RESTART IDENTITY CASCADE;');
+    process.exit(1);
+  }
+
   // ── 1. Products ──────────────────────────────────────────────────────────────
   console.log('1/4  Fetching products from Firestore...');
   const products = await fetchCollection('products');

@@ -32,12 +32,12 @@ const ProductList = () => {
 
   const onAddProduct = async (product) => {
     const productId = await addProductToFirebase(product);
-    setProducts([...products, { id: productId, ...product }]);
+    setProducts([...products, { productId, ...product }]);
   };
 
   const handleEditProduct = async (id, updatedProduct) => {
     await updateProductInFirebase(id, updatedProduct);
-    setProducts(products.map((product) => (product.id === id ? updatedProduct : product)));
+    setProducts(products.map((product) => (product.productId === id ? { ...updatedProduct, productId: id } : product)));
   };
 
   const handleDeleteProduct = async (id) => {

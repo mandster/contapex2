@@ -3,242 +3,301 @@ import {
   updateEmployeeInFirebase,
   deleteEmployeeInFirebase,
   getAllEmployeesFromFirebase,
-} from '../_services/firebaseService';
+} from "../_services/firebaseService";
 import { useEffect, useState } from "react";
 import "../styles.css";
+
+const normalize = (value) => value.trim().toLowerCase();
+
+const EmployeeForm = ({ onAddEmployee, onCancel }) => {
+  const [employeeName, setEmployeeName] = useState("");
+  const [priceCategory, setPriceCategory] = useState("");
+  const [definition, setDefinition] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddEmployee = async () => {
+    if (isSubmitting) return;
+
+    if (!employeeName.trim()) {
+      alert("Employee name is required.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await onAddEmployee({
+        employeeName: employeeName.trim(),
+        priceCategory: priceCategory.trim(),
+        definition: definition.trim(),
+      });
+
+      setEmployeeName("");
+      setPriceCategory("");
+      setDefinition("");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="a-form-container">
+      <input
+        type="text"
+        placeholder="Employee Name"
+        value={employeeName}
+        onChange={(e) => setEmployeeName(e.target.value)}
+      />
+
+      <input
+        type="text"
+        placeholder="Price Category"
+        value={priceCategory}
+        onChange={(e) => setPriceCategory(e.target.value)}
+      />
+
+      <input
+        type="text"
+        placeholder="Definition"
+        value={definition}
+        onChange={(e) => setDefinition(e.target.value)}
+      />
+
+      <div className="button-container">
+        <button
+          onClick={handleAddEmployee}
+          id="add-button"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Adding..." : "Add Employee"}
+        </button>
+
+        <button onClick={onCancel} id="cancel-button" disabled={isSubmitting}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const EmployeeListItem = ({ employee, onEditEmployee, onDeleteEmployee }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [updatedEmployeeName, setUpdatedEmployeeName] = useState(
+    employee.employeeName ?? ""
+  );
+  const [updatedPriceCategory, setUpdatedPriceCategory] = useState(
+    employee.priceCategory ?? ""
+  );
+  const [updatedDefinition, setUpdatedDefinition] = useState(
+    employee.definition ?? ""
+  );
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleUpdateEmployee = async () => {
+    if (isSaving) return;
+
+    if (!updatedEmployeeName.trim()) {
+      alert("Employee name is required.");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      await onEditEmployee(employee.id, {
+        employeeName: updatedEmployeeName.trim(),
+        priceCategory: updatedPriceCategory.trim(),
+        definition: updatedDefinition.trim(),
+      });
+
+      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setUpdatedEmployeeName(employee.employeeName ?? "");
+    setUpdatedPriceCategory(employee.priceCategory ?? "");
+    setUpdatedDefinition(employee.definition ?? "");
+    setIsEditing(false);
+  };
+
+  return (
+    <li className="a-item">
+      {isEditing ? (
+        <>
+          <input
+            type="text"
+            placeholder="Employee Name"
+            value={updatedEmployeeName}
+            onChange={(e) => setUpdatedEmployeeName(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Price Category"
+            value={updatedPriceCategory}
+            onChange={(e) => setUpdatedPriceCategory(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Definition"
+            value={updatedDefinition}
+            onChange={(e) => setUpdatedDefinition(e.target.value)}
+          />
+
+          <button onClick={handleUpdateEmployee} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Update"}
+          </button>
+
+          <button onClick={handleCancelEdit} disabled={isSaving}>
+            Cancel
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="a-name">{employee.employeeName}</span>
+          <span className="a-size">{employee.priceCategory}</span>
+
+          <button onClick={() => setIsEditing(true)}>Edit</button>
+
+          <button id="delete-button" onClick={() => onDeleteEmployee(employee.id)}>
+            Delete
+          </button>
+        </>
+      )}
+    </li>
+  );
+};
+
+const EmployeeListView = ({ employees, onEditEmployee, onDeleteEmployee }) => {
+  return (
+    <>
+      <div className="a-list-heading">
+        <span className="heading-item">Employee Name</span>
+        <span className="heading-item">Price Category</span>
+        <span className="heading-item">Options</span>
+      </div>
+
+      <ul className="a-list">
+        {employees.map((employee) => (
+
+          <EmployeeListItem
+            key={employee.id}
+            employee={employee}
+            onEditEmployee={onEditEmployee}
+            onDeleteEmployee={onDeleteEmployee}
+          />
+        ))}
+      </ul>
+    </>
+  );
+};
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [showAddButton, setAddButton] = useState(true);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       const employeesFromFirebase = await getAllEmployeesFromFirebase();
-      setEmployees(employeesFromFirebase);
+
+      setEmployees(Array.isArray(employeesFromFirebase) ? employeesFromFirebase : []);
     };
+
     fetchEmployees();
   }, []);
 
   const handleAddButton = () => {
     setShowForm(true);
-    setAddButton(false);
   };
 
   const handleCancelAdd = () => {
     setShowForm(false);
-    setAddButton(true);
   };
 
   const onAddEmployee = async (employee) => {
+    const duplicateExists = employees.some(
+      (existingEmployee) =>
+        normalize(existingEmployee.employeeName ?? "") ===
+        normalize(employee.employeeName ?? "")
+    );
+
+    if (duplicateExists) {
+      alert("Employee already exists.");
+      return;
+    }
+
     const employeeId = await addEmployeeToFirebase(employee);
-    setEmployees([...employees, { id: employeeId, ...employee }]);
+
+    setEmployees((prevEmployees) => [
+      ...prevEmployees,
+      {
+        id: employeeId,
+        ...employee,
+      },
+    ]);
+
+    setShowForm(false);
   };
 
   const onEditEmployee = async (id, updatedEmployee) => {
-    const updatedEmployeeWithId = { ...updatedEmployee, id };
+    const duplicateExists = employees.some(
+      (existingEmployee) =>
+        existingEmployee.id !== id &&
+        normalize(existingEmployee.employeeName ?? "") ===
+          normalize(updatedEmployee.employeeName ?? "")
+    );
 
-    if (Array.isArray(employees)) {
-      setEmployees(
-        employees.map((employee) =>
-          employee.id === id ? updatedEmployeeWithId : employee
-        )
-      );
-    } else if (typeof employees === "object" && employees !== null) {
-      const employeesArray = Object.values(employees);
-      setEmployees(
-        employeesArray.map((employee) =>
-          employee.id === id ? updatedEmployeeWithId : employee
-        )
-      );
-    } else {
-      console.error("employees is not an array or object:", employees);
+    if (duplicateExists) {
+      alert("Another employee with this name already exists.");
+      return;
     }
 
+    const updatedEmployeeWithId = {
+      id,
+      ...updatedEmployee,
+    };
+
     await updateEmployeeInFirebase(id, updatedEmployeeWithId);
+
+    setEmployees((prevEmployees) =>
+      prevEmployees.map((employee) =>
+        employee.id === id ? updatedEmployeeWithId : employee
+      )
+    );
   };
 
   const onDeleteEmployee = async (id) => {
-    // Show a confirmation dialog
-    const shouldDelete = window.confirm("Are you sure you want to delete this employee?");
-  
-    if (shouldDelete) {
-      // User confirmed, proceed with deletion
-      await deleteEmployeeInFirebase(id);
-  
-      if (Array.isArray(employees)) {
-        // If employees is an array, filter out the deleted employee and update the state
-        setEmployees(employees.filter((employee) => employee.id !== id));
-      } else {
-        // If employees is not an array, log an error to the console
-        console.error("employees is not an array:", employees);
-      }
-    }
-  };
-  
-  const EmployeeForm = ({ onAddEmployee }) => {
-    const [employeeName, setEmployeeName] = useState("");
-    const [priceCategory, setPriceCategory] = useState("");
-    const [definition, setDefinition] = useState("");
-
-    const handleAddEmployee = () => {
-      const newEmployee = {
-        employeeName: employeeName,
-        priceCategory: priceCategory,
-        definition: definition,
-      };
-
-      onAddEmployee(newEmployee);
-      setEmployeeName("");
-      setPriceCategory("");
-      setDefinition("");
-      setShowForm(false);
-    };
-
-    return (
-      <div className="a-form-container">
-        <input
-          type="text"
-          placeholder="Employee Name"
-          value={employeeName}
-          onChange={(e) => setEmployeeName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Price Category"
-          value={priceCategory}
-          onChange={(e) => setPriceCategory(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Definition"
-          value={definition}
-          onChange={(e) => setDefinition(e.target.value)}
-        />
-      <div className="button-container">
-        <button onClick={handleAddEmployee} id="add-button">
-          Add Employee
-        </button>
-        <button onClick={handleCancelAdd} id="cancel-button">
-          Cancel
-        </button>
-      </div>
-      </div>
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this employee?"
     );
-  };
 
-  const EmployeeListItem = ({ employee, onEditEmployee, onDeleteEmployee }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [updatedEmployeeName, setUpdatedEmployeeName] = useState(
-      employee.employeeName ?? ""
-    );
-    const [updatedPriceCategory, setUpdatedPriceCategory] = useState(
-      employee.priceCategory ?? ""
-    );
-    const [updatedDefinition, setUpdatedDefinition] = useState(
-      employee.definition ?? ""
-    );
-    const handleEditEmployee = () => {
-      setIsEditing(true);
-    };
+    if (!shouldDelete) return;
 
-    const handleUpdateEmployee = () => {
-      const updatedEmployeeDetails = {
-        employeeName: updatedEmployeeName,
-        priceCategory: updatedPriceCategory,
-        definition: updatedDefinition,
-      };
+    await deleteEmployeeInFirebase(id);
 
-      onEditEmployee(employee.id, updatedEmployeeDetails);
-      setIsEditing(false);
-    };
-
-    const handleCancelEdit = () => {
-      setIsEditing(false);
-    };
-
-    return (
-      <li className="a-item">
-        {isEditing ? (
-          <>
-            <input
-              type="text"
-              placeholder="Employee Name"
-              value={updatedEmployeeName}
-              onChange={(e) => setUpdatedEmployeeName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Price Category"
-              value={updatedPriceCategory}
-              onChange={(e) => setUpdatedPriceCategory(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Definition"
-              value={updatedDefinition}
-              onChange={(e) => setUpdatedDefinition(e.target.value)}
-            />
-            <button onClick={handleUpdateEmployee}>Update</button>
-            <button onClick={handleCancelEdit}>Cancel</button>
-          </>
-        ) : (
-          <>
-            <span className="a-name">{employee.employeeName}</span>
-            <span className="a-size">{employee.priceCategory}</span>
-            <button onClick={handleEditEmployee}>Edit</button>
-            <button
-              id="delete-button"
-              onClick={() => onDeleteEmployee(employee.id)}
-            >
-              Delete
-            </button>
-          </>
-        )}
-      </li>
-    );
-  };
-
-  const EmployeeListView = ({
-    employees,
-    onAddEmployee,
-    onEditEmployee,
-    onDeleteEmployee,
-  }) => {
-    return (
-      <>
-        {/* Heading row */}
-        <div className="a-list-heading">
-          <span className="heading-item">Employee Name</span>
-          <span className="heading-item">Price Category</span>
-          <span className="heading-item">Options</span>
-        </div>
-        <ul className="a-list">
-          {employees.map((employee) => (
-            <EmployeeListItem
-              key={employee.id}
-              employee={employee}
-              onEditEmployee={onEditEmployee}
-              onDeleteEmployee={onDeleteEmployee}
-            />
-          ))}
-        </ul>
-      </>
+    setEmployees((prevEmployees) =>
+      prevEmployees.filter((employee) => employee.id !== id)
     );
   };
 
   return (
     <div className="a-list-container">
-      {showAddButton && (
+      {!showForm && (
         <button id="add-button" onClick={handleAddButton}>
           + Add new
         </button>
       )}
 
-      {showForm && <EmployeeForm onAddEmployee={onAddEmployee} />}
+      {showForm && (
+        <EmployeeForm onAddEmployee={onAddEmployee} onCancel={handleCancelAdd} />
+      )}
+
       <EmployeeListView
         employees={employees}
-        onAddEmployee={onAddEmployee}
         onEditEmployee={onEditEmployee}
         onDeleteEmployee={onDeleteEmployee}
       />
