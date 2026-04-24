@@ -1,283 +1,309 @@
-// firebaseService.js
-import app from "../firebaseConfig";
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import "firebase/compat/firestore";
-import { ToastContainer, toast } from 'react-toastify';
+import { supabase } from '../supabaseConfig';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  getDoc,
-  doc,
-  query,
-  where,
-} from "firebase/firestore/lite";
 
-const db = getFirestore(app);
+// ─── PRODUCTS ────────────────────────────────────────────────────────────────
 
 const addProductToFirebase = async (product) => {
-  const docRef = await addDoc(collection(db, "products"), product);
-  return docRef.id;
+  const { data, error } = await supabase
+    .from('products')
+    .insert([{
+      product_name: product.productName,
+      description: product.description || '',
+      size: product.size || '',
+      price: parseFloat(product.price) || 0,
+      price2: parseFloat(product.price2) || 0,
+      price3: parseFloat(product.price3) || 0,
+    }])
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data.id;
 };
 
-const updateProductInFirebase = async (id, updatedProduct) => {
-  if (typeof updatedProduct.size === "undefined") {
-    updatedProduct.size = 0;
-  }
-  // Assuming productRef is a valid DocumentReference obtained from Firestore
-  const productRef = doc(db, "products", String(id));
-
-  // Example data to update
-  const dataToUpdate = {
-    // Valid field value types: string, number, boolean, object, array, null
-    productName: updatedProduct.productName,
-    description: updatedProduct.description || "",
-    price: updatedProduct.price || "",
-    price2: updatedProduct.price2 || "",
-    price3: updatedProduct.price3 || "",
-    size: updatedProduct.size || "",
-    // ... other fields
-  };
-  try {
-    await updateDoc(productRef, dataToUpdate);
-    console.log("Document successfully updated!");
-  } catch (error) {
-    console.error("Error updating document:", error);
-  }
+const updateProductInFirebase = async (id, product) => {
+  const { error } = await supabase
+    .from('products')
+    .update({
+      product_name: product.productName,
+      description: product.description || '',
+      size: typeof product.size === 'undefined' ? '' : String(product.size),
+      price: parseFloat(product.price) || 0,
+      price2: parseFloat(product.price2) || 0,
+      price3: parseFloat(product.price3) || 0,
+    })
+    .eq('id', id);
+  if (error) throw error;
 };
 
 const deleteProductInFirebase = async (id) => {
-  const productRef = doc(db, "products", id);
-  await deleteDoc(productRef);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) throw error;
+};
+
+// Returns products with { productId, productName, ... } shape (used by Entries, Search, products.js)
+const getAllProductsFromFirebase = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('product_name');
+  if (error) throw error;
+  return data.map(p => ({
+    productId: p.id,
+    productName: p.product_name,
+    description: p.description,
+    size: p.size,
+    price: p.price,
+    price2: p.price2,
+    price3: p.price3,
+  }));
+};
+
+// Returns products with { id, productName, ... } shape (used by price.js)
+const getProductsFromFirebase = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('product_name');
+  if (error) throw error;
+  return data.map(p => ({
+    id: p.id,
+    productName: p.product_name,
+    description: p.description,
+    size: p.size,
+    price: p.price,
+    price2: p.price2,
+    price3: p.price3,
+  }));
 };
 
 const getProductByIdFromFirebase = async (productId, employeeId) => {
-  try {
-    const productDoc = await getDoc(doc(db, "products", productId));
-    if (productDoc.exists()) {
-      const productData = productDoc.data();
-      const employeeDoc = await getDoc(doc(db, "employees", employeeId));
-      if (employeeDoc.exists()) {
-        const employeeData = employeeDoc.data();
-        const priceCategory = employeeData.priceCategory;
-        let priceKey;
-        if (priceCategory === "1") {
-          priceKey = "price";
-        } else {
-          priceKey = "price" + priceCategory;
-        }
+  const [{ data: product, error: pErr }, { data: employee, error: eErr }] = await Promise.all([
+    supabase.from('products').select('*').eq('id', productId).single(),
+    supabase.from('employees').select('price_category').eq('id', employeeId).single(),
+  ]);
+  if (pErr) throw pErr;
+  if (eErr) throw eErr;
 
-        return {
-          id: productDoc.id,
-          productName: productData.productName,
-          price: parseFloat(productData[priceKey]) || 0,
-          // Add other fields as needed
-        };
-      } else {
-        throw new Error(`Employee with ID ${employeeId} does not exist`);
-      }
-    } else {
-      throw new Error(`Product with ID ${productId} does not exist`);
-    }
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    throw error;
+  const pc = employee.price_category;
+  let price;
+  if (pc === '1' || pc === '2' || pc === '3') {
+    price = product.price;
+  } else {
+    price = product['price' + pc] ?? product.price;
   }
-};
 
-const getAllProductsFromFirebase = async () => {
-  const querySnapshot = await getDocs(collection(db, "products"));
-  return querySnapshot.docs.map((doc) => ({ productId: doc.id, ...doc.data() }));
-};
-const addEmployeeToFirebase = async (employee) => {
-  const docRef = await addDoc(collection(db, "employees"), employee);
-  return docRef.id;
-};
-
-const updateEmployeeInFirebase = async (id, updatedEmployee) => {
-  const employeeRef = doc(db, "employees", id);
-
-  const dataToUpdate = {
-    employeeName: updatedEmployee.employeeName,
-    priceCategory: updatedEmployee.priceCategory,
-    definition: updatedEmployee.definition,
-    // ... other fields
+  return {
+    id: product.id,
+    productName: product.product_name,
+    price: parseFloat(price) || 0,
   };
+};
 
-  try {
-    await updateDoc(employeeRef, dataToUpdate);
-    console.log("Document successfully updated!");
-  } catch (error) {
-    console.error("Error updating document:", error);
-  }
+// ─── EMPLOYEES ───────────────────────────────────────────────────────────────
+
+const addEmployeeToFirebase = async (employee) => {
+  const { data, error } = await supabase
+    .from('employees')
+    .insert([{
+      employee_name: employee.employeeName,
+      price_category: employee.priceCategory || '1',
+      definition: employee.definition || '',
+    }])
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data.id;
+};
+
+const updateEmployeeInFirebase = async (id, employee) => {
+  const { error } = await supabase
+    .from('employees')
+    .update({
+      employee_name: employee.employeeName,
+      price_category: employee.priceCategory,
+      definition: employee.definition || '',
+    })
+    .eq('id', id);
+  if (error) throw error;
 };
 
 const deleteEmployeeInFirebase = async (id) => {
-  const employeeRef = doc(db, "employees", id);
-  await deleteDoc(employeeRef);
+  const { error } = await supabase.from('employees').delete().eq('id', id);
+  if (error) throw error;
 };
 
 const getAllEmployeesFromFirebase = async () => {
-  const querySnapshot = await getDocs(collection(db, "employees"));
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const { data, error } = await supabase
+    .from('employees')
+    .select('*')
+    .order('employee_name');
+  if (error) throw error;
+  return data.map(e => ({
+    id: e.id,
+    employeeName: e.employee_name,
+    priceCategory: e.price_category,
+    definition: e.definition,
+  }));
 };
+
+// ─── ENTRIES ─────────────────────────────────────────────────────────────────
+
+const addEntryToFirebase = async (entry) => {
+  const { data, error } = await supabase
+    .from('entries')
+    .insert([{
+      date_added: entry.dateAdded,
+      employee_id: entry.employeeId,
+      product_id: entry.productId,
+      quantity: parseFloat(entry.quantity),
+    }])
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data.id;
+};
+
+const updateEntryInFirebase = async (id, entry) => {
+  const { error } = await supabase
+    .from('entries')
+    .update({
+      date_added: entry.dateAdded,
+      employee_id: entry.employeeId,
+      product_id: entry.productId,
+      quantity: parseFloat(entry.quantity),
+    })
+    .eq('id', id);
+  if (error) throw error;
+};
+
+const deleteEntryInFirebase = async (id) => {
+  const { error } = await supabase.from('entries').delete().eq('id', id);
+  if (error) throw error;
+};
+
+// Returns entries with employee_name, product_name, and all price tiers embedded via JOIN.
+// Components can display names directly without a separate lookup array.
+const getAllEntriesFromFirebase = async () => {
+  const { data, error } = await supabase
+    .from('entries')
+    .select(`
+      id,
+      date_added,
+      quantity,
+      employee_id,
+      product_id,
+      employees ( employee_name, price_category ),
+      products ( product_name, price, price2, price3 )
+    `)
+    .order('date_added', { ascending: false });
+  if (error) throw error;
+
+  return data.map(e => ({
+    id: e.id,
+    dateAdded: e.date_added,
+    quantity: e.quantity,
+    employeeId: e.employee_id,
+    productId: e.product_id,
+    // Names embedded from JOIN — no client-side lookup needed
+    employeeName: e.employees?.employee_name || '',
+    productName: e.products?.product_name || '',
+    // Price data for Calculate page
+    priceCategory: e.employees?.price_category || '1',
+    price: e.products?.price || 0,
+    price2: e.products?.price2 || 0,
+    price3: e.products?.price3 || 0,
+  }));
+};
+
+// ─── PRICES ──────────────────────────────────────────────────────────────────
 
 const addPriceToFirebase = async (price) => {
-  const docRef = await addDoc(collection(db, "prices"), price);
-  return docRef.id;
+  const { data, error } = await supabase
+    .from('prices')
+    .insert([{
+      product_id: price.productId,
+      price: parseFloat(price.price) || 0,
+      price2: parseFloat(price.price2) || 0,
+      price3: parseFloat(price.price3) || 0,
+      date: price.date || null,
+    }])
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data.id;
 };
 
-const updatePriceInFirebase = async (id, updatedPrice) => {
-  const priceRef = doc(db, "prices", id);
-  try {
-    await updateDoc(priceRef, updatedPrice);
-    console.log("Price document successfully updated!");
-  } catch (error) {
-    console.error("Error updating price document:", error);
-  }
+const updatePriceInFirebase = async (id, price) => {
+  const { error } = await supabase
+    .from('prices')
+    .update({
+      price: parseFloat(price.price) || 0,
+      price2: parseFloat(price.price2) || 0,
+      price3: parseFloat(price.price3) || 0,
+    })
+    .eq('id', id);
+  if (error) throw error;
 };
 
 const deletePriceInFirebase = async (id) => {
-  const priceRef = doc(db, "prices", id);
-  await deleteDoc(priceRef);
+  const { error } = await supabase.from('prices').delete().eq('id', id);
+  if (error) throw error;
 };
 
 const getAllPricesFromFirebase = async () => {
-  const querySnapshot = await getDocs(collection(db, "prices"));
-  const prices = [];
+  const { data, error } = await supabase
+    .from('prices')
+    .select(`
+      id,
+      price,
+      price2,
+      price3,
+      date,
+      product_id,
+      products ( id, product_name )
+    `)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
 
-  for (const doc of querySnapshot.docs) {
-    const priceData = doc.data();
-
-    // Check if productId exists before querying
-    if (priceData.productId) {
-      const productSnapshot = await getDocs(
-        query(
-          collection(db, "products"),
-          where("productId", "==", priceData.productId)
-        )
-      );
-
-      let productData = null;
-      if (productSnapshot.docs.length > 0) {
-        productData = productSnapshot.docs[0].data();
-      }
-
-      prices.push({
-        product: { ...productData, id: priceData.productId },
-        id: doc.id,
-        price: priceData.price,
-        price2: priceData.price2,
-        price3: priceData.price3,
-        date: priceData.date,
-      });
-    }
-  }
-
-  return prices;
-};
-
-const getProductsFromFirebase = async () => {
-  const querySnapshot = await getDocs(collection(db, "products"));
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-};
-
-/// Function to add an entry to the 'entries' collection
-const addEntryToFirebase = async (entry) => {
-  try {
-    const docRef = await addDoc(collection(db, "entries2"), entry);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error adding entry:", error);
-    throw error;
-  }
-};
-
-// Function to update an entry in the 'entries' collection
-const updateEntryInFirebase = async (entryId, updatedEntry) => {
-  try {
-    const entryRef = doc(db, "entries2", entryId);
-    await updateDoc(entryRef, updatedEntry);
-  } catch (error) {
-    console.error("Error updating entry:", error);
-    throw error;
-  }
-};
-
-// Function to delete an entry from the 'entries' collection
-const deleteEntryInFirebase = async (entryId) => {
-  try {
-    const entryRef = doc(db, "entries2", entryId);
-    await deleteDoc(entryRef);
-  } catch (error) {
-    console.error("Error deleting entry:", error);
-    throw error;
-  }
+  return data.map(p => ({
+    id: p.id,
+    price: p.price,
+    price2: p.price2,
+    price3: p.price3,
+    date: p.date,
+    product: {
+      id: p.product_id,
+      productName: p.products?.product_name || '',
+    },
+  }));
 };
 
 const copyPriceDataToProd = async () => {
-  try {
-    // Fetch all documents from the "price" collection
-    const priceSnapshot = await getDocs(collection(db, "prices"));
-    const priceDocuments = priceSnapshot.docs.map((doc) => doc.data());
+  const { data: prices, error } = await supabase.from('prices').select('*');
+  if (error) throw error;
 
-    // Fetch all documents from the "product" collection
-    const productSnapshot = await getDocs(collection(db, "products"));
-    const productDocuments = productSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    // Iterate through each product document
-    for (const product of productDocuments) {
-      // Find the corresponding document in the "price" collection based on productId
-      const matchingPriceDoc = priceDocuments.find(
-        (price) => price.productId === product.id
-      );
-
-      if (matchingPriceDoc) {
-        // Copy price data from "price" document to "product" document
-        const { price, price2, price3 } = matchingPriceDoc;
-        const productRef = doc(db, "products", product.id);
-        await updateDoc(productRef, { price, price2, price3 });
-        console.log(`Copied price data to product with ID: ${product.id}`);
-      }
-    }
-  } catch (error) {
-    console.error("Error copying price data to product:", error);
+  for (const price of prices) {
+    if (!price.product_id) continue;
+    await supabase
+      .from('products')
+      .update({ price: price.price, price2: price.price2, price3: price.price3 })
+      .eq('id', price.product_id);
   }
 };
 
-// Function to get all entries from the 'entries' collection
-const getAllEntriesFromFirebase = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, "entries2"));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error getting entries:", error);
-    throw error;
-  }
-};
+// ─── UTILS ───────────────────────────────────────────────────────────────────
 
-// Assuming entry.dateAdded is a string representing the date in ISO format (e.g., "2024-01-22T12:34:56Z")
+// Handles both "YYYY-MM-DD" (Supabase DATE) and full ISO strings safely
 const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-  const year = date.getFullYear();
+  if (!dateString) return '';
+  const datePart = String(dateString).split('T')[0];
+  const [year, month, day] = datePart.split('-');
   return `${day}/${month}/${year}`;
 };
 
 const presentToast = (message) => {
-  console.log(message);
-  toast.success(message , {
-    position: toast.POSITION.TOP_RIGHT
-  });
+  toast.success(message, { position: toast.POSITION.TOP_RIGHT });
 };
 
 export {
@@ -301,5 +327,5 @@ export {
   getProductByIdFromFirebase,
   copyPriceDataToProd,
   formatDate,
-  presentToast
+  presentToast,
 };

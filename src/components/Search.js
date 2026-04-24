@@ -44,6 +44,48 @@ const Search = () => {
     setEmployeeId(e.target.value);
   };
 
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // ... (your existing useEffect)
+
+  // Function to handle sorting when a column header is clicked
+  const sortEntries = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  // Function to get the sorted entries based on the current sorting field and order
+  const getSortedEntries = () => {
+    const sortedEntries = [...entries].sort((a, b) => {
+      const fieldA = getField(a, sortBy);
+      const fieldB = getField(b, sortBy);
+
+      if (fieldA < fieldB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+      if (fieldA > fieldB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sortedEntries;
+  };
+
+    // Function to toggle sort icon based on current sorting field and order
+    const getSortIcon = (field) => {
+      if (sortBy === field) {
+        return sortOrder === "asc" ? "▲" : "▼";
+      }
+      return "";
+    };
+    
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const entry = { dateAdded, quantity, productId, employeeId };
@@ -61,16 +103,6 @@ const Search = () => {
     setEmployeeId('');
     setEditingEntryId(null);
     setDateAdded(new Date().toISOString().split('T')[0]); // Reset date to current date
-  };
-
-  const getProductName = (productId) => {
-    const product = products.find((p) => p.productId === productId);
-    return product ? product.productName : '';
-  };
-
-  const getEmployeeName = (employeeId) => {
-    const employee = employees.find((e) => e.id === employeeId);
-    return employee ? employee.employeeName : '';
   };
 
   const handleEditEntry = async (entry) => {
@@ -232,21 +264,29 @@ const Search = () => {
         </form>
       </div>
 
-      {/* Render the entry list with heading row */}
-      <div className="a-list-container">
+{/* Render the entry list with heading row */}
+<div className="a-list-container">
         <ul>
           <li className="a-list-heading">
-          <span className="heading-item">Date</span>
-            <span className="heading-item">Product</span>
-            <span className="heading-item">Employee</span>
-            <span className="heading-item">Quantity</span>
+            <span className="heading-item" onClick={() => sortEntries("dateAdded")}>
+              Date {getSortIcon("dateAdded")}
+            </span>
+            <span className="heading-item" onClick={() => sortEntries("productName")}>
+              Product {getSortIcon("productName")}
+            </span>
+            <span className="heading-item" onClick={() => sortEntries("employeeId")}>
+              Employee {getSortIcon("employeeId")}
+            </span>
+            <span className="heading-item" onClick={() => sortEntries("quantity")}>
+              Quantity {getSortIcon("quantity")}
+            </span>
             <span className="heading-item">Options</span>
           </li>
           {currentEntries.map((entry) => (
             <li className="a-item" key={entry.id}>
               <span className="a-size">{formatDate(entry.dateAdded)}</span>
-              <span className="a-size">{getProductName(entry.productId)}</span>
-              <span className="a-size centered-text">{getEmployeeName(entry.employeeId)}</span>
+              <span className="a-size">{entry.productName}</span>
+              <span className="a-size centered-text">{entry.employeeName}</span>
               <span className="a-size centered-text">{entry.quantity}</span>
               <span className="a-size centered-text">
                 <button id="edit-button" onClick={() => handleEditEntry(entry)}>Edit</button>

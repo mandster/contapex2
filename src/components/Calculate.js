@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   getAllEmployeesFromFirebase,
   getAllEntriesFromFirebase,
-  getProductByIdFromFirebase,
-  presentToast,
-
+  formatDate,
 } from "../_services/firebaseService";
+
 
 const Calculate = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Initialize with current month
@@ -15,6 +14,9 @@ const Calculate = () => {
   const [totalMonthAmount, setTotalMonthAmount] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [employees, setEmployees] = useState([]);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc"); // Default sort order
+  
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -36,48 +38,70 @@ const Calculate = () => {
     setSelectedYear(parseInt(e.target.value));
   };
 
-  const handleGetRecords = async () => {
 
+const sortEntries = (field) => {
+  if (sortBy === field) {
+    // If already sorting by the same field, toggle the sort order
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  } else {
+    // If sorting by a different field, set the new field and reset the sort order to ascending
+    setSortBy(field);
+    setSortOrder("asc");
+  }
+};
+
+// Sort entries based on selected field and order
+let sortedEntries = [...entries];
+if (sortBy) {
+  sortedEntries.sort((a, b) => {
+    if (a[sortBy] < b[sortBy]) {
+      return sortOrder === "asc" ? -1 : 1;
+    }
+    if (a[sortBy] > b[sortBy]) {
+      return sortOrder === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+}
+
+// Function to toggle sort icon based on current sorting field and order
+const getSortIcon = (field) => {
+  if (sortBy === field) {
+    return sortOrder === "asc" ? "▲" : "▼";
+  }
+  return "";
+};
+
+
+  const handleGetRecords = async () => {
     if (!selectedMonth || !selectedYear || !selectedEmployeeId) {
       alert("Please select month, year, and employee");
       return;
     }
 
     try {
-      // Fetch entries for the selected employee and month/year
       const allEntries = await getAllEntriesFromFirebase();
       const filteredEntries = allEntries.filter((entry) => {
-        const entryDate = new Date(entry.dateAdded);
-        const month = entryDate.getMonth() + 1;
-        const year = entryDate.getFullYear();
-        const entryEmployeeId = entry.employeeId; // Rename to avoid conflict
-        //   console.log(entryEmployeeId + " " + selectedEmployeeId);
-        return (
-          month === selectedMonth &&
-          year === selectedYear &&
-          entryEmployeeId === selectedEmployeeId // Use selectedEmployeeId or any variable holding the selected employee ID
-        );
+        const [entryYear, entryMonth] = String(entry.dateAdded).split('T')[0].split('-').map(Number);
+        return entryMonth === selectedMonth && entryYear === selectedYear && entry.employeeId === selectedEmployeeId;
       });
+
       let total = 0;
       let totalQty = 0;
-      const updatedEntries = await Promise.all(
-        filteredEntries.map(async (entry) => {
-          // console.log(entry.productId + " dsds " + entry.employeeId)
-          const product = await getProductByIdFromFirebase(
-            entry.productId,
-            entry.employeeId
-          );
-          const rowTotal = entry.quantity * (product.price || 0); // Use 0 if price is not available
-          total += parseFloat(rowTotal);
-          totalQty += parseFloat(entry.quantity);
-          return {
-            ...entry,
-            productName: product.productName,
-            price: product.price,
-            rowTotal,
-          };
-        })
-      );
+
+      // Entries already carry price tiers and price_category from the DB JOIN —
+      // no extra API calls needed per entry.
+      const updatedEntries = filteredEntries.map((entry) => {
+        const pc = entry.priceCategory;
+        const price = (pc === '1' || pc === '2' || pc === '3')
+          ? entry.price
+          : (entry['price' + pc] ?? entry.price);
+        const rowTotal = entry.quantity * (parseFloat(price) || 0);
+        total += rowTotal;
+        totalQty += parseFloat(entry.quantity);
+        return { ...entry, price: parseFloat(price) || 0, rowTotal };
+      });
+
       setEntries(updatedEntries);
       setTotalMonthAmount(total);
       setTotalQuantity(totalQty);
@@ -136,17 +160,26 @@ const Calculate = () => {
         </div>
       </div>
       <div className="a-list-container">
-        <ul>
-          <li className="a-list-heading">
-            <span className="heading-item">Date</span>
-            <span className="heading-item">Product</span>
-            <span className="heading-item">Quantity</span>
-            <span className="heading-item">Price</span>
-            <span className="heading-item">Row Total</span>
-          </li>
-          {entries.map((entry) => (
-            <li className="a-item" key={entry.id}>
-              <span className="a-size">{formatDate(entry.dateAdded)}</span>
+  <ul>
+    <li className="a-list-heading">
+      <span className="heading-item" onClick={() => sortEntries("dateAdded")}>
+        Date {getSortIcon("dateAdded")}
+      </span>
+      <span className="heading-item" onClick={() => sortEntries("productName")}>
+        Product {getSortIcon("productName")}
+      </span>
+      <span className="heading-item" onClick={() => sortEntries("quantity")}>
+        Quantity {getSortIcon("quantity")}
+      </span>
+      <span className="heading-item" onClick={() => sortEntries("price")}>
+        Price {getSortIcon("price")}
+      </span>
+      <span className="heading-item" onClick={() => sortEntries("rowTotal")}>
+        Row Total {getSortIcon("rowTotal")}
+      </span>
+    </li>
+    {sortedEntries.map((entry) => (
+      <li className="a-item" key={entry.id}>              <span className="a-size">{formatDate(entry.dateAdded)}</span>
               <span className="a-size centered-text">{entry.productName}</span>
               <span className="a-size centered-text">{entry.quantity}</span>
               <span className="a-size centered-text">{entry.price}</span>

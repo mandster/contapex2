@@ -45,7 +45,8 @@ const ProductList = () => {
   
     if (shouldDelete) {
       await deleteProductInFirebase(id);
-      setProducts(products.filter((product) => product.id !== id));
+      setProducts(products.filter((product) => product.productId !== id));
+      alert('Product deleted successfully!');
     }
   };
 
@@ -138,7 +139,7 @@ style={{width:300}}
     const [updatedProduct, setUpdatedProduct] = useState({ ...product });
 
     const handleUpdateProduct = () => {
-      onEditProduct(product.id, updatedProduct);
+      onEditProduct(product.productId, updatedProduct);
       setIsEditing(false);
     };
 
@@ -200,7 +201,7 @@ style={{width:300}}
             <button onClick={() => setIsEditing(true)}>Edit</button>
             <button
               id="delete-button"
-              onClick={() => onDeleteProduct(product.id)}
+              onClick={() => onDeleteProduct(product.productId)}
             >
               Delete
             </button>
@@ -233,7 +234,7 @@ style={{width:300}}
         <ul>
           {products.map((product) => ( 
             <ProductListItem
-              key={product.id}
+              key={product.productId}
               product={product}
               onEditProduct={handleEditProduct}
               onDeleteProduct={handleDeleteProduct}

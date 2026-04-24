@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(js|jsx|json\\)$\")",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(npx react-scripts *)",
+      "Bash(node migrate.mjs)",
+      "Bash(pkill -f migrate.mjs)"
+    ]
+  }
+}
