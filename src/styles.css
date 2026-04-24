@@ -1,24 +1,274 @@
+/* ─── Layout containers ──────────────────────────────────── */
+
 .a-list-container {
   width: 100%;
   margin: auto;
-  margin-top: 21px;
-  font-family: "Arial", sans-serif;
-  z-index: 1;
+  margin-top: 24px;
+  font-family: 'Inter', sans-serif;
 }
 
-.a-list {
-  list-style: none;
-  padding: 0;
+.a-container {
+  margin: 0 auto;
+  padding: 20px;
 }
-/* Add styles for heading row */
+
+.container {
+  width: 95%;
+}
+
+/* ─── Table heading row ──────────────────────────────────── */
+
 .a-list-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #3498db; /* Blue color for the heading row */
-  color: #fff; /* White text color */
-  padding: 10px;
-  font-weight: bold;
+  background: linear-gradient(90deg, var(--surface-2) 0%, #1a2a40 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--accent);
+  padding: 11px 14px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heading-item {
+  flex: 1;
+  text-align: center;
+}
+
+/* ─── List ───────────────────────────────────────────────── */
+
+.a-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+
+.a-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
+  transition: background-color var(--transition);
+}
+
+.a-item:last-child {
+  border-bottom: none;
+}
+
+.a-item:hover {
+  background-color: var(--surface-2);
+}
+
+.a-name  { flex: 1; color: var(--text); font-weight: 500; }
+.a2-name { flex: 2; color: var(--text); font-weight: 500; }
+.a-size  { flex: 1; color: var(--text-muted); font-size: 0.92rem; }
+
+/* ─── Inputs ─────────────────────────────────────────────── */
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+.a-select {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  margin: 4px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.a-select {
+  height: 34px;
+}
+
+/* ─── Add / inline form ──────────────────────────────────── */
+
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px;
+  margin: 0 0 8px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.a-form-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 10px;
+}
+
+.a-form-container input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.a-form {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+
+.form-control {
+  max-width: 90%;
+}
+
+/* ─── Buttons — base ─────────────────────────────────────── */
+
+button {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 13px;
+  margin: 3px;
+  transition: background-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  letter-spacing: 0.02em;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* default — used by .a-item and .a-list-container */
+.a-item button,
+.a-list-container button {
+  background-color: var(--primary);
+  color: #fff;
+  padding: 6px 13px;
+  margin: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.a-item button:hover,
+.a-list-container button:hover {
+  background-color: var(--primary-dim);
+  box-shadow: 0 0 10px rgba(79, 124, 248, 0.35);
+}
+
+.a-form-container button {
+  background-color: var(--success);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.a-form-container button:hover {
+  background-color: #0d9e6e;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+/* ─── Named buttons ──────────────────────────────────────── */
+
+#add-button {
+  background-color: var(--accent);
+  color: #0b1120;
+  font-weight: 600;
+  border: none;
+}
+
+#add-button:hover {
+  background-color: var(--accent-dim);
+  box-shadow: 0 0 12px rgba(0, 212, 170, 0.4);
+}
+
+#cancel-button {
+  background-color: transparent;
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+#cancel-button:hover {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+#delete-button {
+  background-color: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+#delete-button:hover {
+  background-color: rgba(240, 82, 82, 0.12);
+  box-shadow: 0 0 8px rgba(240, 82, 82, 0.25);
+}
+
+#edit-button {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+#edit-button:hover {
+  background-color: rgba(79, 124, 248, 0.12);
+  box-shadow: 0 0 8px rgba(79, 124, 248, 0.25);
+}
+
+#nice-button {
+  background-color: var(--accent);
+  color: #0b1120;
+  font-weight: 600;
+}
+
+#nice-button:hover {
+  background-color: var(--accent-dim);
+  box-shadow: 0 0 12px rgba(0, 212, 170, 0.4);
+}
+
+/* ─── Total / summary ────────────────────────────────────── */
+
+.total {
+  width: 70%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin: 0 auto;
+  font-size: 22px;
+  padding: 8px 16px;
 }
 
 .centered-text {
@@ -26,278 +276,171 @@
   margin: 0;
 }
 
-.heading-item {
-  flex: 1;
-  text-align: center;
+/* ─── Navbar overrides ───────────────────────────────────── */
+
+.navbar,
+.navbar.navbar-light.bg-light {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  padding: 10px 20px;
 }
 
-/* ... (other styles) */
-/* Add styles for heading row */
-.a-list-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #bec0c0;
-  border-radius: 3px;
-  background-color: #f7f7f7; /* Blue color for the heading row */
-  color: #022c36; /* White text color */
-  padding: 10px;
-  font-weight: bold;
+.navbar .navbar-toggler {
+  border-color: var(--border);
 }
 
-.heading-item {
-  flex: 1;
-  text-align: center;
+.navbar .navbar-toggler-icon {
+  filter: invert(0.7);
 }
 
-.total {
-  width: 70%;
-  border: 1px solid lightcyan;
-  margin: 0 auto;
-  font-size: 22px;
+.nav-link,
+.navbar .nav-link {
+  color: var(--text-muted) !important;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 6px 12px !important;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition), background-color var(--transition);
+  letter-spacing: 0.02em;
 }
 
-/* ... (other styles) */
-
-.a-name {
-  flex: 1;
-}
-
-.a2-name {
-  flex: 2;
-}
-.a-size {
-  flex: 1;
-}
-
-.a-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center; /* Align to the center */
-  border-bottom: 1px solid #ccc;
-  padding: 10px;
-}
-
-.a-item button {
-  cursor: pointer;
-  padding: 5px 10px;
-}
-
-.a-form {
-  position: fixed; /* Fixed position to stay on top */
-  top: 20px;
-  left: 50%; /* Center horizontally */
-  transform: translateX(-50%); /* Center horizontally */
-  background-color: #fff;
-  border: 1px solid #ccc;
-  padding: 20px;
-  z-index: 1000; /* Ensure it's above other elements */
-  display: flex;
-  align-items: center;
-}
-
-.a-form input select {
-  margin-right: 10px;
-  padding: 8px;
-}
-
-.a-form button {
-  padding: 8px 15px;
-  cursor: pointer;
-}
-/* ... (previous styles) */
-
-/* Add styles for buttons */
-.a-item button {
-  cursor: pointer;
-  padding: 8px 15px;
-  margin: 5px;
-  background-color: #3498db; /* Blue color */
-  color: #fff; /* White text color */
+.nav-link:hover,
+.navbar .nav-link:hover {
+  color: var(--accent) !important;
+  background-color: var(--accent-glow);
   border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
 }
 
-.container {
-  width: 95%;
-}
+/* ─── Home page buttons ──────────────────────────────────── */
 
-.a-container {
-  margin: 0 auto; /* Center the container horizontally */
-  padding: 20px; /* Add some padding to the container */
-}
-
-.add-form {
-  padding: 4px;
-  margin: 2px auto;
-  background-color: #e3edfd;
-  width: 95%;
+.home-container {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  align-self: center;
-  border: 1px solid rgb(111, 132, 252);
-  border-radius: 3px;
-}
-
-.form-control {
-  max-width: 90%;
-}
-
-.add-form input,
-button {
-  margin: 4px;
-  padding: 4px;
-  border-radius: 2px;
-  border: none;
-}
-
-.a-list-container button {
-  cursor: pointer;
-  padding: 8px 15px;
-  margin: 5px;
-  background-color: #3477db; /* Blue color */
-  color: #fff; /* White text color */
-  border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.a-list-container input select {
-  cursor: pointer;
-  padding: 8px 15px;
-  margin: 5px;
-  background-color: #ffffff; /* Blue color */
-  color: #333232; /* White text color */
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.a-select {
-  background-color: #ffffff; /* Blue color */
-  color: #333232; /* White text color */
-  border-radius: 4px;
-  height: 30px;
-}
-
-#cancel-button {
-  background-color: #d8940d; /* Blue color */
-  color:  #ffffff;
-}
-
-#cancel-button:hover {
-  background-color: #f3b02a; /* Blue color */
-}
-
-#nice-button {
-  background-color: #5cfadd; /* Blue color */
-  color: #022c36;
-}
-
-#nice-button:hover {
-  background-color: #41dabe; /* Blue color */
-}
-
-#a-flex {
-  width: 1400px;
-}
-.home-button {
-  width: 135px;
-  height: 55px;
-  border-radius: 3px;
-  display:inline-block;
-  margin: 10px;
-  padding: 10px;
-  text-align: center;
-  vertical-align: middle;
-  color: beige
-}
-
-.nav-link:hover {
-  border: 1px solid grey;
-  border-radius: 3px;
-  font-weight:600;
+  min-height: 60vh;
 }
 
 .home-container a {
   text-decoration: none;
 }
 
-#edit-button {
-  background-color: #043580; /* Blue color */
-  color:rgb(243, 246, 218)
-}
-#edit-button:hover {
-  background-color:#0d4aa5;/* Blue color */
-}
-#delete-button {
-  background-color: #db5b34; /* Blue color */
-  color:rgb(243, 246, 218)
+.home-container .button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
 }
 
-#delete-button:hover {
-  background-color: #fe815b; /* Blue color */
+.home-button {
+  width: 140px;
+  height: 80px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
-#add-button {
-  background-color: #1aadad; /* Blue color */
-  border: 1px solid green;
-}
-#add-button:hover {
-  background-color: #048181; /* Blue color */
+.home-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
 }
 
-.a-form-container button {
-  padding: 8px 15px;
-  cursor: pointer;
-  background-color: #2ecc71; /* Green color */
-  color: #fff; /* White text color */
-  border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+.home-button h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
-/* Change button color on hover */
-.a-item button:hover,
-.a-form-container button:hover {
-  background-color: #2980b9; /* Darker blue on hover */
+/* override id-based colors on home buttons to fit the dark theme */
+.home-button#cancel-button {
+  border-color: var(--warning);
+  color: var(--warning);
+  background: transparent;
+}
+.home-button#cancel-button:hover { box-shadow: 0 8px 28px rgba(245,158,11,0.2); }
+
+.home-button#edit-button {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: transparent;
+}
+.home-button#edit-button:hover { box-shadow: 0 8px 28px rgba(79,124,248,0.25); }
+
+.home-button#add-button {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+}
+.home-button#add-button:hover { box-shadow: 0 8px 28px rgba(0,212,170,0.25); }
+
+.home-button#nice-button {
+  border-color: #22d3ee;
+  color: #22d3ee;
+  background: transparent;
+}
+.home-button#nice-button:hover { box-shadow: 0 8px 28px rgba(34,211,238,0.25); }
+
+.home-button#delete-button {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: transparent;
+}
+.home-button#delete-button:hover { box-shadow: 0 8px 28px rgba(240,82,82,0.2); }
+
+/* ─── Misc ───────────────────────────────────────────────── */
+
+#a-flex {
+  width: 1400px;
 }
 
-/* ... (other styles) */
+/* ─── Responsive ─────────────────────────────────────────── */
 
-/* Responsive design for smaller screens */
 @media screen and (max-width: 768px) {
   .a-list-container {
     width: 100%;
-    box-sizing: border-box;
   }
 
   .a-item {
     flex-direction: column;
     text-align: center;
+    gap: 6px;
   }
 
   .a-item button {
-    margin-top: 10px;
+    margin-top: 6px;
     margin-left: 0;
   }
+
   .a-form-container {
-    width: 80%;
+    width: 90%;
     margin: auto;
+    flex-direction: column;
   }
 
   .a-form-container input {
     width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
 
   .button-container {
     display: flex;
     justify-content: space-between;
   }
+
   .a-form {
     flex-direction: column;
-    width: 80%; /* Adjust the width as needed */
+    width: 85%;
     left: 50%;
     transform: translateX(-50%);
   }
